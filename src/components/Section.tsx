@@ -14,36 +14,29 @@ export function Section({ id, dayRange, label, title, children, className = '' }
   return (
     <section
       id={id}
-      className={`min-h-screen flex flex-col justify-center px-6 md:px-12 py-20 ${className}`}
+      className={`min-h-screen flex flex-col justify-center px-6 md:px-12 py-24 ${className}`}
     >
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
-        viewport={{ once: false, amount: 0.3 }}
-        className="max-w-2xl mx-auto w-full"
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        viewport={{ once: false, amount: 0.25 }}
+        className="max-w-[38rem] mx-auto w-full"
       >
-        {/* Section header */}
-        {(dayRange || label) && (
-          <div className="flex items-center gap-3 mb-6">
-            {dayRange && (
-              <span className="text-[10px] font-mono tracking-wider text-accent-teal bg-accent-teal/10 px-2.5 py-1 rounded">
-                {dayRange}
-              </span>
-            )}
-            {label && (
-              <span className="text-[10px] uppercase tracking-[0.2em] text-text-muted">
-                {label}
-              </span>
-            )}
+        {/* Section header — minimal */}
+        {dayRange && (
+          <div className="mb-8">
+            <span className="text-[11px] font-mono text-text-muted tracking-wide">
+              {dayRange}
+            </span>
           </div>
         )}
 
-        <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl mb-6 text-text-primary leading-tight">
+        <h2 className="font-heading text-2xl md:text-[2rem] lg:text-[2.5rem] mb-8 leading-[1.15]">
           {title}
         </h2>
 
-        <div className="space-y-6">{children}</div>
+        <div className="space-y-7">{children}</div>
       </motion.div>
     </section>
   );
@@ -51,32 +44,33 @@ export function Section({ id, dayRange, label, title, children, className = '' }
 
 export function Paragraph({ children }: { children: ReactNode }) {
   return (
-    <p className="text-text-secondary text-base md:text-lg leading-relaxed">{children}</p>
+    <p className="text-[15px] md:text-base text-text-secondary leading-[1.8] tracking-[-0.005em]">
+      {children}
+    </p>
   );
 }
 
 export function Callout({ children, type = 'info' }: { children: ReactNode; type?: 'info' | 'warning' | 'danger' }) {
-  const styles = {
-    info: 'border-accent-teal/30 bg-accent-teal/5',
-    warning: 'border-accent-amber/30 bg-accent-amber/5',
-    danger: 'border-accent-red/30 bg-accent-red/5',
+  const borderColors = {
+    info: 'border-text-muted/20',
+    warning: 'border-accent-amber/30',
+    danger: 'border-accent-red/30',
   };
 
   return (
-    <div className={`border-l-2 pl-5 py-3 ${styles[type]} rounded-r-lg`}>
-      <div className="text-sm text-text-secondary leading-relaxed">{children}</div>
+    <div className={`border-l ${borderColors[type]} pl-5 py-1`}>
+      <div className="text-[14px] text-text-secondary/80 leading-[1.75] italic">{children}</div>
     </div>
   );
 }
 
 export function StatGrid({ stats }: { stats: { label: string; value: string; sub?: string }[] }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 my-6">
+    <div className="grid grid-cols-3 gap-x-8 gap-y-6 my-10 py-8 border-y border-border-subtle">
       {stats.map((stat) => (
-        <div key={stat.label} className="bg-bg-elevated/50 border border-border-subtle rounded-lg p-4">
-          <div className="text-2xl font-heading font-light text-text-primary mb-1">{stat.value}</div>
-          <div className="text-[10px] uppercase tracking-wider text-text-muted">{stat.label}</div>
-          {stat.sub && <div className="text-[11px] text-text-secondary mt-1">{stat.sub}</div>}
+        <div key={stat.label}>
+          <div className="text-xl md:text-2xl font-heading font-light text-text-primary">{stat.value}</div>
+          <div className="text-[11px] text-text-muted mt-1">{stat.label}</div>
         </div>
       ))}
     </div>

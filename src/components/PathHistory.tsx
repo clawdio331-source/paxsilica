@@ -26,27 +26,24 @@ export function PathHistory() {
 
   return (
     <div className="mb-3">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-text-muted mb-2">
-        Your Path
+      <div className="text-[9px] font-mono text-text-muted mb-2 uppercase tracking-wider">
+        Path
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="space-y-1">
         {choices.map(([key, { day, options }]) => {
           const val = checkpointChoices[key];
           if (val === null) return null;
-          const isEscalation = val === 1;
           return (
             <button
               key={key}
               onClick={() => clearChoicesAfter(key)}
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border transition-colors cursor-pointer ${
-                isEscalation
-                  ? 'bg-accent-red/10 border-accent-red/30 text-accent-red hover:bg-accent-red/20'
-                  : 'bg-accent-green/10 border-accent-green/30 text-accent-green hover:bg-accent-green/20'
-              }`}
+              className="block w-full text-left text-[11px] text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
               title={`Day ${day}: ${options[val]} — Click to revisit`}
             >
-              <span className="opacity-60">D{day}</span>
-              <span>{options[val]}</span>
+              <span className="font-mono text-text-muted/60">D{day}</span>{' '}
+              <span className={val === 1 ? 'text-accent-red/70' : 'text-accent-green/70'}>
+                {options[val]}
+              </span>
             </button>
           );
         })}

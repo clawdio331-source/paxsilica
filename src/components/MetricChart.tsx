@@ -29,31 +29,31 @@ const METRIC_CONFIG: Record<MetricType, {
 }> = {
   throughput: {
     fn: supplyChainThroughput,
-    color: '#10b981',
+    color: '#8891a6',
     label: 'Supply Chain Throughput (%)',
     domain: [0, 100],
   },
   capex: {
     fn: capexDeploymentRate,
-    color: '#3b82f6',
+    color: '#8891a6',
     label: 'Capex Deployment Rate (%)',
     domain: [0, 100],
   },
   lobby: {
     fn: lobbyPressureIndex,
-    color: '#f59e0b',
+    color: '#d4930a',
     label: 'Lobby Pressure Index',
     domain: [0, 100],
   },
   insurance: {
     fn: maritimeInsurancePremium,
-    color: '#ef4444',
+    color: '#c43b3b',
     label: 'Maritime Insurance (%)',
     domain: [0, 100],
   },
 };
 
-export function MetricChart({ type, height = 180 }: { type: MetricType; height?: number }) {
+export function MetricChart({ type, height = 160 }: { type: MetricType; height?: number }) {
   const { escalationIndex, conflictDay } = useStore();
   const config = METRIC_CONFIG[type];
 
@@ -69,45 +69,45 @@ export function MetricChart({ type, height = 180 }: { type: MetricType; height?:
   }, [escalationIndex, config]);
 
   return (
-    <div className="bg-bg-elevated/40 border border-border-subtle rounded-xl p-4 my-4">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-text-muted mb-3">
+    <div className="my-6">
+      <div className="text-[10px] font-mono text-text-muted mb-2">
         {config.label}
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
           <defs>
             <linearGradient id={`grad-${type}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={config.color} stopOpacity={0.3} />
+              <stop offset="0%" stopColor={config.color} stopOpacity={0.15} />
               <stop offset="100%" stopColor={config.color} stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="day"
-            tick={{ fontSize: 9, fill: '#6b7280' }}
+            tick={{ fontSize: 9, fill: '#525c70' }}
             tickLine={false}
-            axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-            tickFormatter={(v) => `D${v}`}
+            axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+            tickFormatter={(v) => `${v}`}
           />
           <YAxis
             domain={config.domain}
-            tick={{ fontSize: 9, fill: '#6b7280' }}
+            tick={{ fontSize: 9, fill: '#525c70' }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
             contentStyle={{
-              background: '#1a2035',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
+              background: '#0b0f19',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '0',
               fontSize: '11px',
-              color: '#e8eaf0',
+              color: '#d4d8e4',
             }}
             formatter={(value: number | undefined) => [value?.toFixed(1) ?? '0', config.label]}
             labelFormatter={(label) => `Day ${label}`}
           />
           <ReferenceLine
             x={conflictDay}
-            stroke="rgba(45, 212, 191, 0.5)"
+            stroke="rgba(255, 255, 255, 0.15)"
             strokeDasharray="3 3"
             strokeWidth={1}
           />
@@ -115,7 +115,7 @@ export function MetricChart({ type, height = 180 }: { type: MetricType; height?:
             type="monotone"
             dataKey="value"
             stroke={config.color}
-            strokeWidth={2}
+            strokeWidth={1.5}
             fill={`url(#grad-${type})`}
             animationDuration={500}
           />
@@ -128,7 +128,7 @@ export function MetricChart({ type, height = 180 }: { type: MetricType; height?:
 /**
  * Lobby + IGV dual-axis chart showing "The Arithmetic Deadline"
  */
-export function LobbyRotationChart({ height = 220 }: { height?: number }) {
+export function LobbyRotationChart({ height = 200 }: { height?: number }) {
   const { escalationIndex, conflictDay } = useStore();
 
   const data = useMemo(() => {
@@ -141,7 +141,6 @@ export function LobbyRotationChart({ height = 220 }: { height?: number }) {
     return points;
   }, [escalationIndex]);
 
-  // Find crossover: lobby still rising, rotation declining
   const crossoverDay = useMemo(() => {
     for (let d = 60; d <= 300; d += 5) {
       const rotCurr = softwareRotationIndex(d, escalationIndex);
@@ -156,14 +155,14 @@ export function LobbyRotationChart({ height = 220 }: { height?: number }) {
   }, [escalationIndex]);
 
   return (
-    <div className="bg-bg-elevated/40 border border-border-subtle rounded-xl p-4 my-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-text-muted">
+    <div className="my-6">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[10px] font-mono text-text-muted">
           Lobby Pressure vs Software Rotation
         </div>
         {crossoverDay && (
-          <div className="text-[9px] font-mono text-accent-red bg-accent-red/10 px-2 py-0.5 rounded">
-            Arithmetic Deadline: Day {crossoverDay}
+          <div className="text-[9px] font-mono text-text-muted">
+            Deadline: Day {crossoverDay}
           </div>
         )}
       </div>
@@ -171,48 +170,46 @@ export function LobbyRotationChart({ height = 220 }: { height?: number }) {
         <ComposedChart data={data} margin={{ top: 5, right: 40, bottom: 5, left: -20 }}>
           <defs>
             <linearGradient id="grad-lobby-overlay" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.15} />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+              <stop offset="0%" stopColor="#d4930a" stopOpacity={0.1} />
+              <stop offset="100%" stopColor="#d4930a" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis
             dataKey="day"
-            tick={{ fontSize: 9, fill: '#6b7280' }}
+            tick={{ fontSize: 9, fill: '#525c70' }}
             tickLine={false}
-            axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-            tickFormatter={(v) => `D${v}`}
+            axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
+            tickFormatter={(v) => `${v}`}
           />
           <YAxis
             yAxisId="left"
             domain={[0, 100]}
-            tick={{ fontSize: 9, fill: '#6b7280' }}
+            tick={{ fontSize: 9, fill: '#525c70' }}
             tickLine={false}
             axisLine={false}
-            label={{ value: 'Lobby', angle: -90, position: 'insideLeft', style: { fontSize: 8, fill: '#6b7280' } }}
           />
           <YAxis
             yAxisId="right"
             orientation="right"
             domain={[0, 30]}
-            tick={{ fontSize: 9, fill: '#6b7280' }}
+            tick={{ fontSize: 9, fill: '#525c70' }}
             tickLine={false}
             axisLine={false}
-            label={{ value: 'Rotation %', angle: 90, position: 'insideRight', style: { fontSize: 8, fill: '#6b7280' } }}
           />
           <Tooltip
             contentStyle={{
-              background: '#1a2035',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
+              background: '#0b0f19',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '0',
               fontSize: '11px',
-              color: '#e8eaf0',
+              color: '#d4d8e4',
             }}
             labelFormatter={(label) => `Day ${label}`}
           />
           <ReferenceLine
             x={conflictDay}
             yAxisId="left"
-            stroke="rgba(45, 212, 191, 0.5)"
+            stroke="rgba(255, 255, 255, 0.15)"
             strokeDasharray="3 3"
             strokeWidth={1}
           />
@@ -220,18 +217,17 @@ export function LobbyRotationChart({ height = 220 }: { height?: number }) {
             <ReferenceLine
               x={crossoverDay}
               yAxisId="left"
-              stroke="rgba(239, 68, 68, 0.4)"
+              stroke="rgba(196, 59, 59, 0.3)"
               strokeDasharray="4 4"
               strokeWidth={1}
-              label={{ value: 'Deadline', position: 'top', style: { fontSize: 8, fill: '#ef4444' } }}
             />
           )}
           <Area
             yAxisId="left"
             type="monotone"
             dataKey="lobby"
-            stroke="#f59e0b"
-            strokeWidth={2}
+            stroke="#d4930a"
+            strokeWidth={1.5}
             fill="url(#grad-lobby-overlay)"
             name="Lobby Pressure"
           />
@@ -239,30 +235,23 @@ export function LobbyRotationChart({ height = 220 }: { height?: number }) {
             yAxisId="right"
             type="monotone"
             dataKey="rotation"
-            stroke="#3b82f6"
-            strokeWidth={2}
+            stroke="#4a7fd4"
+            strokeWidth={1.5}
             dot={false}
             name="Software Rotation %"
           />
         </ComposedChart>
       </ResponsiveContainer>
 
-      {/* Legend */}
-      <div className="flex gap-4 mt-2">
+      <div className="flex gap-4 mt-1">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-accent-amber" />
-          <span className="text-[9px] text-text-muted">Lobby Pressure</span>
+          <div className="w-3 h-px bg-[#d4930a]" />
+          <span className="text-[9px] text-text-muted">Lobby</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-accent-blue" />
-          <span className="text-[9px] text-text-muted">Software Rotation</span>
+          <div className="w-3 h-px bg-[#4a7fd4]" />
+          <span className="text-[9px] text-text-muted">Rotation</span>
         </div>
-        {crossoverDay && (
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 bg-accent-red border-t border-dashed" />
-            <span className="text-[9px] text-text-muted">Arithmetic Deadline</span>
-          </div>
-        )}
       </div>
     </div>
   );

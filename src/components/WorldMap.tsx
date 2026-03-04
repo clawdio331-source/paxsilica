@@ -1,202 +1,207 @@
 import { useStore } from '../store/useStore';
 import { motion } from 'framer-motion';
 
-// Simplified SVG world map focused on key trade routes
-// Points: Taiwan/Korea/Japan -> Strait of Hormuz -> Gulf -> Cape of Good Hope alternative -> US
+/*
+ * Simplified but recognizable world map focused on the key trade corridors.
+ * Uses actual geographic proportions (Mercator-ish) for landmasses.
+ */
 
-const ROUTES = {
-  normal: {
-    label: 'Primary Route (via Strait)',
-    path: 'M 680 200 Q 620 220, 560 230 Q 500 240, 450 260 Q 420 270, 380 280',
-    color: '#10b981',
-  },
-  reroute: {
-    label: 'Cape Reroute',
-    path: 'M 680 200 Q 620 240, 560 280 Q 500 340, 440 380 Q 380 400, 340 370 Q 300 340, 280 300 Q 260 260, 280 230 Q 300 200, 340 190 Q 360 185, 380 280',
-    color: '#f59e0b',
-  },
-  pacific: {
-    label: 'Pacific Direct',
-    path: 'M 680 200 Q 740 220, 800 230 Q 850 240, 820 250',
-    color: '#3b82f6',
-  },
+// Simplified landmass outlines — recognizable, not cartographically precise
+const LANDMASSES = {
+  africa:
+    'M 380 180 L 400 170 L 425 165 L 445 172 L 460 180 L 470 195 L 475 215 L 478 240 L 472 265 L 460 285 L 445 300 L 425 310 L 410 308 L 395 295 L 385 275 L 378 255 L 372 230 L 370 210 L 374 192 Z',
+  europe:
+    'M 380 100 L 395 95 L 415 92 L 435 95 L 450 100 L 460 110 L 465 125 L 458 140 L 448 152 L 435 158 L 420 162 L 405 165 L 390 160 L 380 148 L 375 135 L 372 120 L 375 108 Z',
+  middleEast:
+    'M 470 148 L 485 142 L 500 140 L 515 145 L 525 155 L 528 168 L 522 182 L 512 195 L 498 202 L 485 198 L 475 190 L 468 178 L 465 165 Z',
+  southAsia:
+    'M 540 155 L 558 148 L 575 150 L 585 160 L 582 175 L 572 192 L 558 205 L 545 210 L 535 200 L 530 185 L 532 170 Z',
+  eastAsia:
+    'M 600 100 L 625 92 L 648 90 L 668 95 L 678 108 L 680 125 L 675 145 L 665 160 L 648 168 L 632 165 L 618 155 L 608 140 L 600 125 L 598 110 Z',
+  japan:
+    'M 688 105 L 692 98 L 698 95 L 702 100 L 700 115 L 695 128 L 690 135 L 685 130 L 684 118 L 686 108 Z',
+  taiwan: 'M 676 152 L 680 148 L 684 150 L 683 158 L 678 160 Z',
+  seAsia:
+    'M 618 172 L 635 170 L 650 175 L 660 185 L 655 200 L 642 210 L 625 215 L 612 208 L 608 195 L 610 182 Z',
+  northAmerica:
+    'M 120 80 L 160 72 L 200 75 L 230 85 L 250 100 L 260 120 L 255 145 L 242 165 L 225 180 L 205 190 L 185 185 L 165 175 L 148 160 L 135 140 L 125 120 L 118 100 Z',
 };
 
 const NODES = [
-  { x: 680, y: 200, label: 'East Asia Fab', sublabel: 'Taiwan, Japan, Korea' },
-  { x: 450, y: 260, label: 'Strait of Hormuz', sublabel: 'Chokepoint' },
-  { x: 380, y: 280, label: 'Gulf DC Sites', sublabel: 'UAE, Saudi Arabia' },
-  { x: 820, y: 250, label: 'US Facilities', sublabel: 'Data Centers' },
-  { x: 340, y: 370, label: 'Cape of Good Hope', sublabel: '+14-21 days' },
+  { x: 680, y: 150, label: 'Taiwan', sub: 'TSMC Fab' },
+  { x: 694, y: 115, label: 'Japan', sub: 'Substrates' },
+  { x: 660, y: 100, label: 'Korea', sub: 'Samsung/SK' },
+  { x: 505, y: 175, label: 'Gulf', sub: 'DC Sites' },
+  { x: 228, y: 155, label: 'US', sub: 'Data Centers' },
+  { x: 500, y: 160, label: '', sub: 'Strait of Hormuz' },
 ];
+
+const ROUTES = {
+  primary: {
+    path: 'M 680 150 Q 640 155, 600 162 Q 560 170, 530 175 Q 515 178, 505 175',
+    label: 'Primary (via Strait)',
+  },
+  cape: {
+    path: 'M 505 175 Q 478 200, 460 230 Q 440 270, 420 300 Q 400 310, 380 295 Q 360 270, 350 240 Q 340 210, 335 180 Q 330 150, 310 130 Q 280 110, 250 120 Q 230 135, 228 155',
+    label: 'Cape Reroute (+14–21d)',
+  },
+  pacific: {
+    path: 'M 680 150 Q 720 155, 740 160 Q 760 165, 740 170 Q 700 180, 660 190 Q 600 200, 540 210 Q 480 215, 420 210 Q 360 195, 300 180 Q 260 170, 228 155',
+    label: 'Pacific / US Direct',
+  },
+};
 
 export function WorldMap() {
   const { conflictDay, checkpointChoices } = useStore();
 
-  // Route status based on conflict progression
   const straitClosed = checkpointChoices.day60 === 1;
   const isConflicting = conflictDay > 0;
-  const normalRouteOpacity = straitClosed ? 0.15 : isConflicting ? 0.5 : 1;
-  const rerouteOpacity = isConflicting ? (straitClosed ? 1 : 0.6) : 0;
-  const pacificOpacity = straitClosed ? 0.8 : 0.3;
 
-  const straitColor = straitClosed
-    ? '#ef4444'
+  const primaryOpacity = straitClosed ? 0.1 : isConflicting ? 0.4 : 0.7;
+  const capeOpacity = isConflicting ? (straitClosed ? 0.6 : 0.3) : 0;
+  const pacificOpacity = straitClosed ? 0.5 : isConflicting ? 0.15 : 0.1;
+
+  const straitStatus = straitClosed
+    ? '#c43b3b'
     : conflictDay > 30
-      ? '#f59e0b'
-      : conflictDay > 0
-        ? '#f59e0b'
-        : '#10b981';
+      ? '#d4930a'
+      : '#2d9a6e';
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-      <svg viewBox="200 140 700 300" className="w-full h-auto" style={{ filter: 'drop-shadow(0 0 20px rgba(45, 212, 191, 0.08))' }}>
-        {/* Background grid */}
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-          </pattern>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-            <feMerge>
-              <feMergeNode in="coloredBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <rect x="200" y="140" width="700" height="300" fill="url(#grid)" />
+    <div className="my-10">
+      <svg
+        viewBox="100 60 620 280"
+        className="w-full h-auto"
+        style={{ maxHeight: '380px' }}
+      >
+        {/* Landmasses */}
+        {Object.values(LANDMASSES).map((d, i) => (
+          <path
+            key={i}
+            d={d}
+            fill="rgba(255,255,255,0.03)"
+            stroke="rgba(255,255,255,0.07)"
+            strokeWidth="0.5"
+          />
+        ))}
 
-        {/* Simplified landmasses */}
-        <path
-          d="M 280 180 Q 300 170, 340 175 Q 380 180, 420 200 Q 440 220, 430 250 Q 420 280, 400 310 Q 380 340, 350 360 Q 330 370, 320 360 Q 310 340, 300 300 Q 290 260, 280 230 Z"
-          fill="rgba(255,255,255,0.04)"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="0.5"
-        />
-        {/* Middle East */}
-        <path
-          d="M 430 220 Q 450 210, 470 215 Q 490 220, 480 240 Q 470 260, 450 270 Q 435 275, 430 260 Z"
-          fill="rgba(255,255,255,0.04)"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="0.5"
-        />
-        {/* South/East Asia */}
-        <path
-          d="M 580 180 Q 620 170, 660 175 Q 700 180, 720 200 Q 730 220, 710 240 Q 690 255, 660 250 Q 630 245, 610 230 Q 590 215, 580 195 Z"
-          fill="rgba(255,255,255,0.04)"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="0.5"
-        />
-        {/* North America */}
-        <path
-          d="M 780 170 Q 830 160, 860 180 Q 880 200, 870 240 Q 850 270, 820 280 Q 800 275, 790 250 Q 780 220, 780 190 Z"
-          fill="rgba(255,255,255,0.04)"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="0.5"
-        />
-
-        {/* Normal route */}
+        {/* Routes */}
         <motion.path
-          d={ROUTES.normal.path}
+          d={ROUTES.primary.path}
           fill="none"
-          stroke={straitClosed ? '#ef4444' : ROUTES.normal.color}
-          strokeWidth="2"
-          strokeDasharray={straitClosed ? '6 4' : 'none'}
-          animate={{ opacity: normalRouteOpacity }}
-          transition={{ duration: 0.6 }}
-          filter="url(#glow)"
-        />
-
-        {/* Cape reroute */}
-        <motion.path
-          d={ROUTES.reroute.path}
-          fill="none"
-          stroke={ROUTES.reroute.color}
+          stroke={straitClosed ? '#c43b3b' : '#8891a6'}
           strokeWidth="1.5"
-          strokeDasharray="4 3"
-          animate={{ opacity: rerouteOpacity }}
-          transition={{ duration: 0.6 }}
+          strokeDasharray={straitClosed ? '4 3' : 'none'}
+          animate={{ opacity: primaryOpacity }}
+          transition={{ duration: 0.5 }}
         />
-
-        {/* Pacific route */}
+        <motion.path
+          d={ROUTES.cape.path}
+          fill="none"
+          stroke="#d4930a"
+          strokeWidth="1"
+          strokeDasharray="3 3"
+          animate={{ opacity: capeOpacity }}
+          transition={{ duration: 0.5 }}
+        />
         <motion.path
           d={ROUTES.pacific.path}
           fill="none"
-          stroke={ROUTES.pacific.color}
-          strokeWidth="1.5"
+          stroke="#4a7fd4"
+          strokeWidth="0.8"
+          strokeDasharray="2 3"
           animate={{ opacity: pacificOpacity }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         />
 
-        {/* Strait of Hormuz danger zone */}
+        {/* Strait indicator */}
         {isConflicting && (
           <motion.circle
-            cx={450}
-            cy={260}
-            r={straitClosed ? 18 : 12}
+            cx={505}
+            cy={163}
             fill="none"
-            stroke={straitColor}
-            strokeWidth="1"
+            stroke={straitStatus}
+            strokeWidth="0.8"
             animate={{
-              r: straitClosed ? [18, 22, 18] : [12, 15, 12],
-              opacity: [0.6, 0.3, 0.6],
+              r: straitClosed ? [8, 11, 8] : [5, 7, 5],
+              opacity: [0.5, 0.2, 0.5],
             }}
-            transition={{ duration: 2, repeat: Infinity }}
+            transition={{ duration: 3, repeat: Infinity }}
           />
         )}
 
         {/* Nodes */}
         {NODES.map((node, i) => {
-          const isStrait = node.label === 'Strait of Hormuz';
-          const nodeColor = isStrait ? straitColor : 'rgba(255,255,255,0.7)';
+          const isStrait = node.sub === 'Strait of Hormuz';
+          if (isStrait && !isConflicting) return null;
           return (
             <g key={i}>
               <circle
                 cx={node.x}
                 cy={node.y}
-                r={isStrait ? 5 : 4}
-                fill={isStrait ? straitColor : 'rgba(45, 212, 191, 0.8)'}
-                filter="url(#glow)"
+                r={isStrait ? 2.5 : 2}
+                fill={isStrait ? straitStatus : 'rgba(255,255,255,0.5)'}
               />
-              <text
-                x={node.x}
-                y={node.y - 12}
-                textAnchor="middle"
-                fill={nodeColor}
-                fontSize="8"
-                fontFamily="Inter, sans-serif"
-                fontWeight="500"
-              >
-                {node.label}
-              </text>
-              <text
-                x={node.x}
-                y={node.y + 16}
-                textAnchor="middle"
-                fill="rgba(255,255,255,0.35)"
-                fontSize="6"
-                fontFamily="Inter, sans-serif"
-              >
-                {node.sublabel}
-              </text>
+              {node.label && (
+                <text
+                  x={node.x}
+                  y={node.y - 8}
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.55)"
+                  fontSize="7"
+                  fontFamily="Inter, sans-serif"
+                  fontWeight="500"
+                >
+                  {node.label}
+                </text>
+              )}
+              {isStrait && (
+                <text
+                  x={node.x + 12}
+                  y={node.y + 3}
+                  fill={straitStatus}
+                  fontSize="5.5"
+                  fontFamily="Inter, sans-serif"
+                  opacity="0.7"
+                >
+                  {straitClosed ? 'CLOSED' : 'CONTESTED'}
+                </text>
+              )}
             </g>
           );
         })}
 
         {/* Legend */}
-        <g transform="translate(220, 400)">
+        <g transform="translate(115, 320)">
           {[
-            { color: '#10b981', label: 'Normal Route', opacity: normalRouteOpacity },
-            { color: '#f59e0b', label: 'Cape Reroute', opacity: rerouteOpacity },
-            { color: '#3b82f6', label: 'Pacific Direct', opacity: pacificOpacity },
-          ].map((item, i) => (
-            <g key={i} transform={`translate(${i * 130}, 0)`} opacity={Math.max(item.opacity, 0.4)}>
-              <line x1="0" y1="0" x2="16" y2="0" stroke={item.color} strokeWidth="2" />
-              <text x="22" y="3" fill="rgba(255,255,255,0.5)" fontSize="7" fontFamily="Inter, sans-serif">
-                {item.label}
-              </text>
-            </g>
-          ))}
+            { color: '#8891a6', label: 'Primary route', dash: false, show: true },
+            { color: '#d4930a', label: 'Cape reroute', dash: true, show: capeOpacity > 0 },
+            { color: '#4a7fd4', label: 'Pacific', dash: true, show: true },
+          ]
+            .filter((l) => l.show)
+            .map((item, i) => (
+              <g key={i} transform={`translate(${i * 100}, 0)`}>
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="14"
+                  y2="0"
+                  stroke={item.color}
+                  strokeWidth="1"
+                  strokeDasharray={item.dash ? '3 2' : 'none'}
+                  opacity="0.6"
+                />
+                <text
+                  x="18"
+                  y="3"
+                  fill="rgba(255,255,255,0.35)"
+                  fontSize="6.5"
+                  fontFamily="Inter, sans-serif"
+                >
+                  {item.label}
+                </text>
+              </g>
+            ))}
         </g>
       </svg>
     </div>

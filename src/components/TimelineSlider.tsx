@@ -4,7 +4,6 @@ import { CHECKPOINT_DAYS } from '../lib/metrics';
 export function TimelineSlider() {
   const { conflictDay, setConflictDay, checkpointChoices, scrollLocked } = useStore();
 
-  // Determine the max day user can slider to (limited by unchosen checkpoints)
   const choiceKeys = ['day30', 'day60', 'day90', 'day120', 'day180'] as const;
   let maxDay = 360;
   for (let i = 0; i < CHECKPOINT_DAYS.length; i++) {
@@ -14,16 +13,27 @@ export function TimelineSlider() {
     }
   }
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 lg:right-72 z-30 glass-panel border-t border-border-subtle">
-      <div className="max-w-4xl mx-auto px-6 py-3">
-        <div className="flex items-center gap-4">
-          {/* Day labels */}
-          <span className="text-[10px] font-mono text-text-muted w-12 shrink-0">Day 0</span>
+  const progress = (conflictDay / 360) * 100;
 
-          {/* Slider with checkpoint markers */}
-          <div className="relative flex-1">
-            {/* Checkpoint markers */}
+  return (
+    <div className="fixed bottom-0 left-0 right-0 lg:right-64 z-30">
+      <div className="bg-bg-primary/95 backdrop-blur-sm border-t border-border-subtle">
+        <div className="max-w-3xl mx-auto px-8 py-4">
+          {/* Progress bar with markers */}
+          <div className="relative h-6 flex items-center">
+            {/* Track background */}
+            <div className="absolute inset-x-0 h-px bg-white/[0.08]" />
+
+            {/* Filled track */}
+            <div
+              className="absolute left-0 h-px transition-all duration-200"
+              style={{
+                width: `${progress}%`,
+                background: 'rgba(255, 255, 255, 0.25)',
+              }}
+            />
+
+            {/* Checkpoint ticks */}
             {CHECKPOINT_DAYS.map((d) => {
               const pct = (d / 360) * 100;
               const key = choiceKeys[CHECKPOINT_DAYS.indexOf(d)];
@@ -31,20 +41,25 @@ export function TimelineSlider() {
               return (
                 <div
                   key={d}
-                  className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
+                  className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
                   style={{ left: `${pct}%` }}
                 >
                   <div
-                    className={`w-2.5 h-2.5 rounded-full border-2 ${
-                      chosen
-                        ? 'bg-accent-teal border-accent-teal'
-                        : 'bg-bg-primary border-text-muted'
+                    className={`w-1 h-3 rounded-full transition-colors ${
+                      chosen ? 'bg-white/40' : 'bg-white/[0.08]'
                     }`}
                   />
                 </div>
               );
             })}
 
+            {/* Thumb indicator */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-text-primary transition-all duration-200"
+              style={{ left: `${progress}%` }}
+            />
+
+            {/* Invisible range input on top */}
             <input
               type="range"
               min={0}
@@ -52,27 +67,21 @@ export function TimelineSlider() {
               value={conflictDay}
               onChange={(e) => {
                 if (scrollLocked) return;
-                const v = Number(e.target.value);
-                setConflictDay(Math.min(v, maxDay));
+                setConflictDay(Math.min(Number(e.target.value), maxDay));
               }}
-              className="w-full relative z-10"
+              className="absolute inset-0 w-full opacity-0 cursor-pointer"
+              style={{ height: '24px' }}
             />
           </div>
 
-          <span className="text-[10px] font-mono text-text-muted w-14 shrink-0 text-right">
-            Day 360
-          </span>
-        </div>
-
-        {/* Section labels */}
-        <div className="flex justify-between mt-1 text-[9px] text-text-muted">
-          <span>Baseline</span>
-          <span>First 30</span>
-          <span>60-Day Wall</span>
-          <span>Dual-Use</span>
-          <span>Earnings</span>
-          <span>Lobby</span>
-          <span>Endgame</span>
+          {/* Labels */}
+          <div className="flex justify-between mt-1">
+            <span className="text-[10px] font-mono text-text-muted">0</span>
+            <span className="text-[10px] font-mono text-text-muted tabular-nums">
+              Day {conflictDay}
+            </span>
+            <span className="text-[10px] font-mono text-text-muted">360</span>
+          </div>
         </div>
       </div>
     </div>
