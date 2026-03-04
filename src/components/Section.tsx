@@ -44,7 +44,7 @@ export function Section({ id, dayRange, label: _label, title, children, classNam
 
 export function Paragraph({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[15px] md:text-base text-text-secondary leading-[1.8] tracking-[-0.005em]">
+    <p className="text-[15px] md:text-base text-text-secondary leading-[1.8] tracking-[-0.005em] [&_strong]:text-text-primary [&_strong]:font-medium">
       {children}
     </p>
   );

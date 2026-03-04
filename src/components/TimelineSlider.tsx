@@ -16,20 +16,30 @@ export function TimelineSlider() {
   const progress = (conflictDay / 360) * 100;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 lg:right-64 z-30">
-      <div className="bg-bg-primary/95 backdrop-blur-sm border-t border-border-subtle">
+    <div className="fixed bottom-0 left-0 right-0 z-30">
+      <div className="bg-bg-primary/95 backdrop-blur-sm border-t border-white/[0.06]">
         <div className="max-w-3xl mx-auto px-8 py-4">
-          {/* Progress bar with markers */}
-          <div className="relative h-6 flex items-center">
+          {/* Slider label */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] text-text-muted/60 select-none">
+              Drag to scrub timeline
+            </span>
+            <span className="text-[11px] font-mono text-text-primary tabular-nums font-medium">
+              Day {conflictDay}
+            </span>
+          </div>
+
+          {/* Track */}
+          <div className="relative h-8 flex items-center group cursor-grab active:cursor-grabbing">
             {/* Track background */}
-            <div className="absolute inset-x-0 h-px bg-white/[0.08]" />
+            <div className="absolute inset-x-0 h-[3px] bg-white/[0.06] rounded-full" />
 
             {/* Filled track */}
             <div
-              className="absolute left-0 h-px transition-all duration-200"
+              className="absolute left-0 h-[3px] rounded-full transition-all duration-150"
               style={{
                 width: `${progress}%`,
-                background: 'rgba(255, 255, 255, 0.25)',
+                background: 'linear-gradient(90deg, rgba(56,191,167,0.4), rgba(255,255,255,0.3))',
               }}
             />
 
@@ -45,21 +55,27 @@ export function TimelineSlider() {
                   style={{ left: `${pct}%` }}
                 >
                   <div
-                    className={`w-1 h-3 rounded-full transition-colors ${
-                      chosen ? 'bg-white/40' : 'bg-white/[0.08]'
+                    className={`w-1 h-4 rounded-full transition-colors ${
+                      chosen ? 'bg-white/40' : 'bg-white/[0.12]'
                     }`}
                   />
                 </div>
               );
             })}
 
-            {/* Thumb indicator */}
+            {/* Thumb */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-text-primary transition-all duration-200"
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-150 pointer-events-none"
               style={{ left: `${progress}%` }}
-            />
+            >
+              {/* Outer glow */}
+              <div className="w-5 h-5 rounded-full bg-accent-teal/20 group-hover:bg-accent-teal/30 transition-colors flex items-center justify-center">
+                {/* Inner dot */}
+                <div className="w-3 h-3 rounded-full bg-text-primary shadow-[0_0_8px_rgba(56,191,167,0.4)] group-hover:shadow-[0_0_12px_rgba(56,191,167,0.6)] transition-shadow" />
+              </div>
+            </div>
 
-            {/* Invisible range input on top */}
+            {/* Range input overlay */}
             <input
               type="range"
               min={0}
@@ -69,18 +85,15 @@ export function TimelineSlider() {
                 if (scrollLocked) return;
                 setConflictDay(Math.min(Number(e.target.value), maxDay));
               }}
-              className="absolute inset-0 w-full opacity-0 cursor-pointer"
-              style={{ height: '24px' }}
+              className="absolute inset-0 w-full opacity-0 cursor-grab active:cursor-grabbing"
+              style={{ height: '32px' }}
             />
           </div>
 
           {/* Labels */}
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] font-mono text-text-muted">0</span>
-            <span className="text-[10px] font-mono text-text-muted tabular-nums">
-              Day {conflictDay}
-            </span>
-            <span className="text-[10px] font-mono text-text-muted">360</span>
+            <span className="text-[10px] font-mono text-text-muted/50">Day 0</span>
+            <span className="text-[10px] font-mono text-text-muted/50">Day 360</span>
           </div>
         </div>
       </div>

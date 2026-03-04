@@ -78,18 +78,18 @@ export function Section5Lobby() {
       title="The Lobby Inflection"
     >
       <Paragraph>
-        The AI directive from late February frames AGI as century-defining technology.
+        The AI directive from late February frames AGI as <strong>century-defining technology</strong>.
         The companies funding the AGI race are the primary contractors of the national
         security state. When they engage the White House about shipping lanes, that is a
-        national security briefing with a capex deadline attached.
+        <strong>national security briefing with a capex deadline attached</strong>.
       </Paragraph>
 
       <LobbyGauge />
 
       <Paragraph>
-        The administration cannot claim AI supremacy as doctrine and simultaneously
-        allow a regional war to starve the chip supply chain. This is the contradiction
-        that the capex spenders exploit — not through threats, but through arithmetic.
+        The administration <strong>cannot claim AI supremacy as doctrine and simultaneously
+        allow a regional war to starve the chip supply chain</strong>. This is the contradiction
+        that the capex spenders exploit — not through threats, but <strong>through arithmetic</strong>.
         The numbers make the argument.
       </Paragraph>
 
@@ -117,10 +117,10 @@ export function Section5Lobby() {
       )}
 
       <Paragraph>
-        This is where national security interest and corporate interest become
-        indistinguishable. The same people who need AI supremacy need the shipping
+        This is where <strong>national security interest and corporate interest become
+        indistinguishable</strong>. The same people who need AI supremacy need the shipping
         lanes open. The same budget that funds defense needs the buildout on schedule.
-        The convergence is not incidental — it is structural.
+        The convergence is not incidental — <strong>it is structural</strong>.
       </Paragraph>
     </Section>
   );

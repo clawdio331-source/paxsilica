@@ -17,9 +17,9 @@ export function Section6Endgame() {
       >
         <Paragraph>
           A resolution emerges — heavy-handed and fast. Framed publicly as energy
-          security but fundamentally about silicon logistics. He who controls the
-          shipping lanes controls the buildout. The buildout is now indistinguishable
-          from the national interest.
+          security but fundamentally about <strong>silicon logistics</strong>. He who controls the
+          shipping lanes controls the buildout. <strong>The buildout is now indistinguishable
+          from the national interest.</strong>
         </Paragraph>
 
         <Callout type="info">
@@ -32,8 +32,8 @@ export function Section6Endgame() {
         <WorldMap />
 
         <Paragraph>
-          The map begins to heal. Green lines return. But recovery is asymmetric:
-          damage is fast, recovery is slow. A 90-day conflict takes roughly 180 days
+          The map begins to heal. Green lines return. But <strong>recovery is asymmetric:
+          damage is fast, recovery is slow</strong>. A 90-day conflict takes roughly 180 days
           to fully unwind. Insurance markets have long memories. Supply chain trust,
           once broken, rebuilds in quarters, not weeks.
         </Paragraph>
@@ -58,9 +58,9 @@ export function Section6Endgame() {
       title="The New Map"
     >
       <Paragraph>
-        No resolution is in sight. The conflict has become structural — a permanent
+        No resolution is in sight. <strong>The conflict has become structural</strong> — a permanent
         feature of the geopolitical landscape rather than a temporary disruption.
-        Supply chains are being permanently rerouted. The Gulf corridor, once the
+        Supply chains are being <strong>permanently rerouted</strong>. The Gulf corridor, once the
         backbone of the buildout's logistics, is written off.
       </Paragraph>
 

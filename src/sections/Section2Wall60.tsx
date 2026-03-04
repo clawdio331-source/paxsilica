@@ -20,9 +20,9 @@ export function Section2Wall60() {
         <>
           <Paragraph>
             Inventory drawdown is orderly but accelerating. Substrate manufacturers —
-            Resonac, Entegris, Ibiden — report delays but are managing through existing
-            stockpiles and partial workarounds. Gulf data center projects are paused
-            but not cancelled. The market is still pricing in a short disruption.
+            <strong>Resonac, Entegris, Ibiden</strong> — report delays but are managing through existing
+            stockpiles and partial workarounds. Gulf data center projects are <strong>paused
+            but not cancelled</strong>. The market is still pricing in a short disruption.
           </Paragraph>
           <Callout type="info">
             Procurement teams have found partial workarounds through rerouting. The
@@ -33,10 +33,10 @@ export function Section2Wall60() {
       ) : (
         <>
           <Paragraph>
-            The inventory cliff hits hard. Resonac, Entegris, and Ibiden issue force
-            majeure notices on select contracts. Gulf data center projects are cancelled
+            The inventory cliff hits hard. <strong>Resonac, Entegris, and Ibiden issue force
+            majeure notices</strong> on select contracts. Gulf data center projects are cancelled
             outright — sunk costs written off in emergency board meetings. The rerouting
-            capacity around the Cape is overwhelmed as every shipper in the hemisphere
+            capacity around the Cape is <strong>overwhelmed</strong> as every shipper in the hemisphere
             competes for the same constrained lanes.
           </Paragraph>
           <Callout type="danger">
@@ -49,8 +49,8 @@ export function Section2Wall60() {
 
       <Paragraph>
         This is where inventory buffers run out and physical reality hits. The difference
-        between a spreadsheet delay and an empty warehouse becomes visceral. You cannot
-        will silicon into existence.
+        between a spreadsheet delay and an empty warehouse becomes visceral. <strong>You cannot
+        will silicon into existence.</strong>
       </Paragraph>
 
       <MetricChart type="throughput" />
@@ -59,10 +59,10 @@ export function Section2Wall60() {
 
       {/* Capital Rotation — the money has to go somewhere */}
       <Paragraph>
-        But the money doesn't disappear. When hardware capex gets physically
+        But <strong>the money doesn't disappear</strong>. When hardware capex gets physically
         bottlenecked, capital rotates. The $710B doesn't sit idle — it starts flowing
-        toward the supply-chain-agnostic side of the AI trade: software, inference
-        optimization, tooling. The rotation window is opening.
+        toward the supply-chain-agnostic side of the AI trade: <strong>software, inference
+        optimization, tooling</strong>. The rotation window is opening.
       </Paragraph>
 
       <CapitalFlowDiagram />

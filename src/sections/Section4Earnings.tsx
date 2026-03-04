@@ -23,8 +23,8 @@ export function Section4Earnings() {
       title="The Quarterly Earnings Problem"
     >
       <Paragraph>
-        Q2 earnings season arrives with the buildout behind schedule. The gap between
-        committed capex and deployable capex becomes the story. Every hyperscaler faces
+        Q2 earnings season arrives with the buildout behind schedule. <strong>The gap between
+        committed capex and deployable capex becomes the story.</strong> Every hyperscaler faces
         the same question on every analyst call: "How much of your capex commitment is
         actually deployable under current conditions?"
       </Paragraph>
@@ -70,9 +70,9 @@ export function Section4Earnings() {
 
       <Paragraph>
         The quarterly reporting cycle does something no amount of strategic patience
-        can override: it forces a public reckoning. The gap between what was promised
+        can override: <strong>it forces a public reckoning</strong>. The gap between what was promised
         and what can be delivered is now a number on an earnings slide, and that number
-        has consequences measured in market capitalization.
+        has consequences <strong>measured in market capitalization</strong>.
       </Paragraph>
     </Section>
   );

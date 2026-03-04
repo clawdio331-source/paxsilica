@@ -15,10 +15,10 @@ export function Section1First30() {
     >
       <Paragraph>
         The Strait of Hormuz is contested. Shipping reroutes begin immediately — not
-        because the route is closed, but because underwriters reprice the risk overnight.
+        because the route is closed, but because <strong>underwriters reprice the risk overnight</strong>.
         Insurance premiums jump before a single cargo ship is touched. This is how
-        modern conflicts propagate: through spreadsheets before they propagate through
-        steel.
+        modern conflicts propagate: <strong>through spreadsheets before they propagate through
+        steel</strong>.
       </Paragraph>
 
       <MetricChart type="insurance" />
@@ -26,8 +26,8 @@ export function Section1First30() {
       <Paragraph>
         Procurement teams start drawing down existing inventory. The mood across
         hyperscaler boardrooms is cautious optimism — "this will blow over." But beneath
-        the surface, logistics teams are already scrambling. Every day of conflict adds
-        cost. Every reroute adds time. The economics of the buildout begin shifting under
+        the surface, logistics teams are already scrambling. <strong>Every day of conflict adds
+        cost. Every reroute adds time.</strong> The economics of the buildout begin shifting under
         assumptions that were locked in during peacetime.
       </Paragraph>
 
@@ -45,8 +45,8 @@ export function Section1First30() {
       <Paragraph>
         Meanwhile in the Gulf, the compute corridor faces its first live stress test.
         Drone strikes target coastal data center nodes in the UAE and Bahrain. But the
-        infrastructure holds. The intercept rate exceeds 95%. Services go down briefly
-        and come back. The Gulf proved it can be defended — and that changes the calculus.
+        infrastructure holds. <strong>The intercept rate exceeds 95%.</strong> Services go down briefly
+        and come back. The Gulf proved it can be defended — and <strong>that changes the calculus</strong>.
       </Paragraph>
 
       <GulfMap />

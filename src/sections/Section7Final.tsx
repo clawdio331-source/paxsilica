@@ -169,7 +169,7 @@ export function Section7Final() {
       title="The Final Accounting"
     >
       <Paragraph>
-        The capex spenders are anti-war out of arithmetic. This is what the arithmetic
+        <strong>The capex spenders are anti-war out of arithmetic.</strong> This is what the arithmetic
         looks like under the scenario you constructed.
       </Paragraph>
 

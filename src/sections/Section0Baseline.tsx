@@ -46,9 +46,9 @@ export function Section0Baseline() {
         title="Before Escalation"
       >
         <Paragraph>
-          The $710 billion capex commitment across hyperscalers represents the largest
+          The <strong>$710 billion</strong> capex commitment across hyperscalers represents the largest
           coordinated infrastructure bet in corporate history. Supply chains run clean.
-          Maritime insurance sits at peacetime premiums. The Gulf region positions itself
+          Maritime insurance sits at <strong>peacetime premiums</strong>. The Gulf region positions itself
           as the "New Switzerland" for compute — sovereign wealth funding data center
           campuses from Abu Dhabi to Neom.
         </Paragraph>

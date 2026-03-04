@@ -1,138 +1,170 @@
+import { useEffect, useState, useMemo } from 'react';
 import { useStore } from '../store/useStore';
 import { motion } from 'framer-motion';
+import { geoNaturalEarth1, geoPath } from 'd3-geo';
+import type { GeoPermissibleObjects } from 'd3-geo';
+import { feature } from 'topojson-client';
+import type { Topology, GeometryCollection } from 'topojson-specification';
+import type { FeatureCollection, Geometry } from 'geojson';
 
-/*
- * Simplified but recognizable world map focused on the key trade corridors.
- * Uses actual geographic proportions (Mercator-ish) for landmasses.
- */
+const TOPO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json';
 
-// Simplified landmass outlines — recognizable, not cartographically precise
-const LANDMASSES = {
-  africa:
-    'M 380 180 L 400 170 L 425 165 L 445 172 L 460 180 L 470 195 L 475 215 L 478 240 L 472 265 L 460 285 L 445 300 L 425 310 L 410 308 L 395 295 L 385 275 L 378 255 L 372 230 L 370 210 L 374 192 Z',
-  europe:
-    'M 380 100 L 395 95 L 415 92 L 435 95 L 450 100 L 460 110 L 465 125 L 458 140 L 448 152 L 435 158 L 420 162 L 405 165 L 390 160 L 380 148 L 375 135 L 372 120 L 375 108 Z',
-  middleEast:
-    'M 470 148 L 485 142 L 500 140 L 515 145 L 525 155 L 528 168 L 522 182 L 512 195 L 498 202 L 485 198 L 475 190 L 468 178 L 465 165 Z',
-  southAsia:
-    'M 540 155 L 558 148 L 575 150 L 585 160 L 582 175 L 572 192 L 558 205 L 545 210 L 535 200 L 530 185 L 532 170 Z',
-  eastAsia:
-    'M 600 100 L 625 92 L 648 90 L 668 95 L 678 108 L 680 125 L 675 145 L 665 160 L 648 168 L 632 165 L 618 155 L 608 140 L 600 125 L 598 110 Z',
-  japan:
-    'M 688 105 L 692 98 L 698 95 L 702 100 L 700 115 L 695 128 L 690 135 L 685 130 L 684 118 L 686 108 Z',
-  taiwan: 'M 676 152 L 680 148 L 684 150 L 683 158 L 678 160 Z',
-  seAsia:
-    'M 618 172 L 635 170 L 650 175 L 660 185 L 655 200 L 642 210 L 625 215 L 612 208 L 608 195 L 610 182 Z',
-  northAmerica:
-    'M 120 80 L 160 72 L 200 75 L 230 85 L 250 100 L 260 120 L 255 145 L 242 165 L 225 180 L 205 190 L 185 185 L 165 175 L 148 160 L 135 140 L 125 120 L 118 100 Z',
-};
+const WIDTH = 800;
+const HEIGHT = 420;
 
-const NODES = [
-  { x: 680, y: 150, label: 'Taiwan', sub: 'TSMC Fab' },
-  { x: 694, y: 115, label: 'Japan', sub: 'Substrates' },
-  { x: 660, y: 100, label: 'Korea', sub: 'Samsung/SK' },
-  { x: 505, y: 175, label: 'Gulf', sub: 'DC Sites' },
-  { x: 228, y: 155, label: 'US', sub: 'Data Centers' },
-  { x: 500, y: 160, label: '', sub: 'Strait of Hormuz' },
+const projection = geoNaturalEarth1()
+  .scale(145)
+  .translate([WIDTH / 2, HEIGHT / 2 + 20]);
+
+const pathGen = geoPath(projection);
+
+// Key nodes in lon/lat
+const NODES_GEO = [
+  { lon: 121.5, lat: 25.0, label: 'Taiwan', sub: 'TSMC Fab' },
+  { lon: 139.7, lat: 35.7, label: 'Japan', sub: 'Substrates' },
+  { lon: 127.0, lat: 37.5, label: 'Korea', sub: 'Samsung/SK' },
+  { lon: 54.4, lat: 24.5, label: 'Gulf', sub: 'DC Sites' },
+  { lon: -98.0, lat: 38.0, label: 'US', sub: 'Data Centers' },
+  { lon: 56.3, lat: 26.6, label: '', sub: 'Strait of Hormuz' },
 ];
 
-const ROUTES = {
-  primary: {
-    path: 'M 680 150 Q 640 155, 600 162 Q 560 170, 530 175 Q 515 178, 505 175',
-    label: 'Primary (via Strait)',
-  },
-  cape: {
-    path: 'M 505 175 Q 478 200, 460 230 Q 440 270, 420 300 Q 400 310, 380 295 Q 360 270, 350 240 Q 340 210, 335 180 Q 330 150, 310 130 Q 280 110, 250 120 Q 230 135, 228 155',
-    label: 'Cape Reroute (+14–21d)',
-  },
-  pacific: {
-    path: 'M 680 150 Q 720 155, 740 160 Q 760 165, 740 170 Q 700 180, 660 190 Q 600 200, 540 210 Q 480 215, 420 210 Q 360 195, 300 180 Q 260 170, 228 155',
-    label: 'Pacific / US Direct',
-  },
-};
+function projectPoint(lon: number, lat: number): [number, number] {
+  return (projection([lon, lat]) as [number, number]) ?? [0, 0];
+}
+
+// Build a smooth curve between two projected points via optional waypoints
+function routePath(coords: [number, number][]): string {
+  if (coords.length < 2) return '';
+  const pts = coords.map(([lon, lat]) => projectPoint(lon, lat));
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++) {
+    const prev = pts[i - 1];
+    const curr = pts[i];
+    const cx = (prev[0] + curr[0]) / 2;
+    const cy = (prev[1] + curr[1]) / 2;
+    d += ` Q ${prev[0] + (cx - prev[0]) * 0.5} ${prev[1] + (cy - prev[1]) * 1.2}, ${curr[0]} ${curr[1]}`;
+  }
+  return d;
+}
+
+const PRIMARY_ROUTE = routePath([
+  [121.5, 25], [110, 15], [95, 10], [80, 12], [65, 20], [56.3, 26.6], [54, 24],
+]);
+
+const CAPE_ROUTE = routePath([
+  [54, 24], [50, 20], [45, 12], [42, 5], [38, -5], [30, -20],
+  [20, -34], [15, -34.5], [5, -30], [-5, -15], [0, 5],
+  [-10, 15], [-20, 25], [-40, 30], [-60, 32], [-80, 30], [-98, 38],
+]);
+
+const PACIFIC_ROUTE = routePath([
+  [121.5, 25], [140, 35], [160, 40], [180, 42], [-160, 40],
+  [-140, 38], [-120, 35], [-98, 38],
+]);
 
 export function WorldMap() {
   const { conflictDay, checkpointChoices } = useStore();
+  const [landGeo, setLandGeo] = useState<FeatureCollection<Geometry> | null>(null);
+
+  useEffect(() => {
+    fetch(TOPO_URL)
+      .then((r) => r.json())
+      .then((topo: Topology<{ land: GeometryCollection }>) => {
+        const geo = feature(topo, topo.objects.land) as FeatureCollection<Geometry>;
+        setLandGeo(geo);
+      })
+      .catch(() => {
+        // Silently fail — map will just not show landmasses
+      });
+  }, []);
+
+  const landPaths = useMemo(() => {
+    if (!landGeo) return [];
+    return landGeo.features.map((f) => pathGen(f as GeoPermissibleObjects) ?? '');
+  }, [landGeo]);
 
   const straitClosed = checkpointChoices.day60 === 1;
   const isConflicting = conflictDay > 0;
 
-  const primaryOpacity = straitClosed ? 0.1 : isConflicting ? 0.4 : 0.7;
-  const capeOpacity = isConflicting ? (straitClosed ? 0.6 : 0.3) : 0;
-  const pacificOpacity = straitClosed ? 0.5 : isConflicting ? 0.15 : 0.1;
+  const primaryOpacity = straitClosed ? 0.08 : isConflicting ? 0.4 : 0.6;
+  const capeOpacity = isConflicting ? (straitClosed ? 0.5 : 0.2) : 0;
+  const pacificOpacity = straitClosed ? 0.4 : isConflicting ? 0.12 : 0.08;
 
-  const straitStatus = straitClosed
+  const straitColor = straitClosed
     ? '#c43b3b'
     : conflictDay > 30
       ? '#d4930a'
       : '#2d9a6e';
 
+  const projectedNodes = NODES_GEO.map((n) => {
+    const [x, y] = projectPoint(n.lon, n.lat);
+    return { ...n, x, y };
+  });
+
+  const straitNode = projectedNodes.find((n) => n.sub === 'Strait of Hormuz')!;
+
   return (
     <div className="my-10">
-      <svg
-        viewBox="100 60 620 280"
-        className="w-full h-auto"
-        style={{ maxHeight: '380px' }}
-      >
-        {/* Landmasses */}
-        {Object.values(LANDMASSES).map((d, i) => (
+      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full h-auto" style={{ maxHeight: '380px' }}>
+        {/* Landmasses from Natural Earth */}
+        {landPaths.map((d, i) => (
           <path
             key={i}
             d={d}
-            fill="rgba(255,255,255,0.03)"
-            stroke="rgba(255,255,255,0.07)"
+            fill="rgba(255,255,255,0.04)"
+            stroke="rgba(255,255,255,0.08)"
             strokeWidth="0.5"
           />
         ))}
 
-        {/* Routes */}
+        {/* Trade routes */}
         <motion.path
-          d={ROUTES.primary.path}
+          d={PRIMARY_ROUTE}
           fill="none"
           stroke={straitClosed ? '#c43b3b' : '#8891a6'}
           strokeWidth="1.5"
-          strokeDasharray={straitClosed ? '4 3' : 'none'}
+          strokeDasharray={straitClosed ? '6 4' : 'none'}
           animate={{ opacity: primaryOpacity }}
           transition={{ duration: 0.5 }}
         />
         <motion.path
-          d={ROUTES.cape.path}
+          d={CAPE_ROUTE}
           fill="none"
           stroke="#d4930a"
           strokeWidth="1"
-          strokeDasharray="3 3"
+          strokeDasharray="4 4"
           animate={{ opacity: capeOpacity }}
           transition={{ duration: 0.5 }}
         />
         <motion.path
-          d={ROUTES.pacific.path}
+          d={PACIFIC_ROUTE}
           fill="none"
           stroke="#4a7fd4"
           strokeWidth="0.8"
-          strokeDasharray="2 3"
+          strokeDasharray="3 4"
           animate={{ opacity: pacificOpacity }}
           transition={{ duration: 0.5 }}
         />
 
-        {/* Strait indicator */}
+        {/* Strait pulsing indicator */}
         {isConflicting && (
           <motion.circle
-            cx={505}
-            cy={163}
-            r={straitClosed ? 8 : 5}
+            cx={straitNode.x}
+            cy={straitNode.y}
+            r={6}
             fill="none"
-            stroke={straitStatus}
-            strokeWidth="0.8"
+            stroke={straitColor}
+            strokeWidth="1"
             animate={{
-              r: straitClosed ? [8, 11, 8] : [5, 7, 5],
-              opacity: [0.5, 0.2, 0.5],
+              r: straitClosed ? [8, 12, 8] : [5, 8, 5],
+              opacity: [0.4, 0.15, 0.4],
             }}
             transition={{ duration: 3, repeat: Infinity }}
           />
         )}
 
         {/* Nodes */}
-        {NODES.map((node, i) => {
+        {projectedNodes.map((node, i) => {
           const isStrait = node.sub === 'Strait of Hormuz';
           if (isStrait && !isConflicting) return null;
           return (
@@ -140,16 +172,16 @@ export function WorldMap() {
               <circle
                 cx={node.x}
                 cy={node.y}
-                r={isStrait ? 2.5 : 2}
-                fill={isStrait ? straitStatus : 'rgba(255,255,255,0.5)'}
+                r={isStrait ? 2.5 : 3}
+                fill={isStrait ? straitColor : 'rgba(255,255,255,0.5)'}
               />
               {node.label && (
                 <text
                   x={node.x}
-                  y={node.y - 8}
+                  y={node.y - 10}
                   textAnchor="middle"
-                  fill="rgba(255,255,255,0.55)"
-                  fontSize="7"
+                  fill="rgba(255,255,255,0.6)"
+                  fontSize="10"
                   fontFamily="Inter, sans-serif"
                   fontWeight="500"
                 >
@@ -158,10 +190,10 @@ export function WorldMap() {
               )}
               {isStrait && (
                 <text
-                  x={node.x + 12}
-                  y={node.y + 3}
-                  fill={straitStatus}
-                  fontSize="5.5"
+                  x={node.x + 14}
+                  y={node.y + 4}
+                  fill={straitColor}
+                  fontSize="8"
                   fontFamily="Inter, sans-serif"
                   opacity="0.7"
                 >
@@ -173,7 +205,7 @@ export function WorldMap() {
         })}
 
         {/* Legend */}
-        <g transform="translate(115, 320)">
+        <g transform={`translate(20, ${HEIGHT - 30})`}>
           {[
             { color: '#8891a6', label: 'Primary route', dash: false, show: true },
             { color: '#d4930a', label: 'Cape reroute', dash: true, show: capeOpacity > 0 },
@@ -181,22 +213,18 @@ export function WorldMap() {
           ]
             .filter((l) => l.show)
             .map((item, i) => (
-              <g key={i} transform={`translate(${i * 100}, 0)`}>
+              <g key={i} transform={`translate(${i * 120}, 0)`}>
                 <line
-                  x1="0"
-                  y1="0"
-                  x2="14"
-                  y2="0"
+                  x1="0" y1="0" x2="18" y2="0"
                   stroke={item.color}
-                  strokeWidth="1"
-                  strokeDasharray={item.dash ? '3 2' : 'none'}
+                  strokeWidth="1.2"
+                  strokeDasharray={item.dash ? '4 3' : 'none'}
                   opacity="0.6"
                 />
                 <text
-                  x="18"
-                  y="3"
+                  x="24" y="3.5"
                   fill="rgba(255,255,255,0.35)"
-                  fontSize="6.5"
+                  fontSize="9"
                   fontFamily="Inter, sans-serif"
                 >
                   {item.label}

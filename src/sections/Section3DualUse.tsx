@@ -16,10 +16,10 @@ export function Section3DualUse() {
     >
       <Paragraph>
         Here is the fact that breaks the narrative of "the AI buildout is unstoppable":
-        the same high-purity chemicals used for AI chips go into missile guidance
-        systems. The same substrates, the same fabrication capacity, the same supply
+        <strong>the same high-purity chemicals used for AI chips go into missile guidance
+        systems</strong>. The same substrates, the same fabrication capacity, the same supply
         chain. When a conflict demands munitions, the buildout and the war machine are
-        competing for the same atoms.
+        <strong>competing for the same atoms</strong>.
       </Paragraph>
 
       <Callout type="warning">
@@ -63,9 +63,9 @@ export function Section3DualUse() {
 
       <Paragraph>
         The capex spenders lose supply to their own government's munitions priorities.
-        The irony is structural: the companies building the infrastructure that the
-        national security state says it needs are being starved of materials by that
-        same national security state's wartime demands.
+        <strong>The irony is structural</strong>: the companies building the infrastructure that the
+        national security state says it needs are being <strong>starved of materials by that
+        same national security state's</strong> wartime demands.
       </Paragraph>
     </Section>
   );
