@@ -3,7 +3,7 @@ import { Section, Paragraph, Callout } from '../components/Section';
 import { SankeyDiagram } from '../components/SankeyDiagram';
 
 export function Section3DualUse() {
-  const { checkpointChoices, escalationIndex } = useStore();
+  const { escalationIndex } = useStore();
   const isMild = escalationIndex < 0.3;
   const isSevere = escalationIndex > 0.6;
 

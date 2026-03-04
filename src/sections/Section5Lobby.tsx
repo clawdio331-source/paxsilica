@@ -4,7 +4,7 @@ import { MetricChart } from '../components/MetricChart';
 import { motion } from 'framer-motion';
 
 function LobbyGauge() {
-  const { metrics, escalationIndex } = useStore();
+  const { metrics } = useStore();
   const pressure = metrics.lobbyPressure;
   const angle = (pressure / 100) * 180;
 

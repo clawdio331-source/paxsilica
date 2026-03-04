@@ -2,7 +2,7 @@ import { useStore } from '../store/useStore';
 import { Section, Paragraph } from '../components/Section';
 import { motion } from 'framer-motion';
 import type { CheckpointChoices } from '../lib/metrics';
-import { computeEscalationIndex, computeAllMetrics } from '../lib/metrics';
+import { computeAllMetrics } from '../lib/metrics';
 
 const CHOICE_LABELS: Record<keyof CheckpointChoices, { day: number; options: [string, string]; question: string }> = {
   day30: { day: 30, options: ['Contained Escalation', 'Spreading'], question: 'Nature of the Conflict' },

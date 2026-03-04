@@ -207,7 +207,7 @@ export function GuidanceCalculator() {
 
 // Recovery/Repricing Calculator
 export function RecoveryCalculator() {
-  const { checkpointChoices, escalationIndex, conflictDay } = useStore();
+  const { checkpointChoices, escalationIndex } = useStore();
   const isResolution = checkpointChoices.day180 === 0;
 
   if (isResolution) {

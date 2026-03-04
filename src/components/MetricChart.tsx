@@ -99,7 +99,7 @@ export function MetricChart({ type, height = 180 }: { type: MetricType; height?:
               fontSize: '11px',
               color: '#e8eaf0',
             }}
-            formatter={(value: number) => [value.toFixed(1), config.label]}
+            formatter={(value: number | undefined) => [value?.toFixed(1) ?? '0', config.label]}
             labelFormatter={(label) => `Day ${label}`}
           />
           <ReferenceLine

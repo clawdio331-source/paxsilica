@@ -31,7 +31,7 @@ const NODES = [
 ];
 
 export function WorldMap() {
-  const { conflictDay, checkpointChoices, escalationIndex } = useStore();
+  const { conflictDay, checkpointChoices } = useStore();
 
   // Route status based on conflict progression
   const straitClosed = checkpointChoices.day60 === 1;
