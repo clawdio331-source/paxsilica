@@ -149,6 +149,50 @@ export function MetricsPanel() {
               />
             </div>
 
+            {/* Capital Rotation */}
+            <div className="mt-4 space-y-0">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-accent-blue mb-2">
+                Capital Rotation
+              </div>
+              <MetricRow
+                label="SW Rotation"
+                value={metrics.softwareRotation.toFixed(1)}
+                unit="%"
+                status={metrics.softwareRotation > 15 ? 'amber' : metrics.softwareRotation > 5 ? 'green' : 'green'}
+              />
+              <MetricRow
+                label="IGV Multiplier"
+                value={`${metrics.igvMultiplier}x`}
+                unit=""
+                status={metrics.igvMultiplier > 1.3 ? 'amber' : 'green'}
+              />
+            </div>
+
+            {/* Regional */}
+            <div className="mt-4 space-y-0">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-accent-teal mb-2">
+                Gulf Corridor
+              </div>
+              <MetricRow
+                label="Gulf Capacity"
+                value={metrics.gulfCapacity}
+                unit="MW"
+                status="green"
+              />
+              <MetricRow
+                label="Inland Shift"
+                value={metrics.inlandShift}
+                unit="%"
+                status={metrics.inlandShift > 60 ? 'amber' : 'green'}
+              />
+              <MetricRow
+                label="Defense Conf."
+                value={metrics.defenseConfidence}
+                unit="/100"
+                status={getInverseStatus(metrics.defenseConfidence, [60, 80])}
+              />
+            </div>
+
             {/* Escalation index */}
             <div className="mt-5 pt-4 border-t border-border-subtle">
               <div className="flex items-center justify-between">

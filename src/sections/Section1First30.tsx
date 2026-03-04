@@ -1,6 +1,9 @@
 import { Section, Paragraph, Callout } from '../components/Section';
 import { InsuranceCalculator } from '../components/Calculator';
 import { MetricChart } from '../components/MetricChart';
+import { GulfMap } from '../components/GulfMap';
+import { DefenseDividendCard } from '../components/DefenseDividend';
+import { InlandShiftCalculator } from '../components/InlandShiftCalculator';
 
 export function Section1First30() {
   return (
@@ -36,12 +39,26 @@ export function Section1First30() {
 
       <InsuranceCalculator />
 
+      {/* Gulf Regional Stress Test */}
+      <DefenseDividendCard />
+
       <Paragraph>
-        The map tells the story. Primary routes through the Gulf shift from green to
-        amber. Alternative routes — longer, around the Cape of Good Hope — appear in
-        orange. Each reroute adds 14 to 21 days of transit time, compounding delay across
-        every procurement cycle.
+        Meanwhile in the Gulf, the compute corridor faces its first live stress test.
+        Drone strikes target coastal data center nodes in the UAE and Bahrain. But the
+        infrastructure holds. The intercept rate exceeds 95%. Services go down briefly
+        and come back. The Gulf proved it can be defended — and that changes the calculus.
       </Paragraph>
+
+      <GulfMap />
+
+      <Paragraph>
+        The pie does not shrink. It grows — and it grows inland. Capital that was already
+        flowing to KSA accelerates. The geographic center of gravity shifts from coastal
+        nodes toward Riyadh, where there is more land, more power headroom, and more
+        strategic depth. Bahrain retains its role as a KSA annex.
+      </Paragraph>
+
+      <InlandShiftCalculator />
     </Section>
   );
 }

@@ -2,6 +2,8 @@ import { useStore } from '../store/useStore';
 import { Section, Paragraph, Callout } from '../components/Section';
 import { InventoryCalculator } from '../components/Calculator';
 import { MetricChart } from '../components/MetricChart';
+import { CapitalFlowDiagram } from '../components/CapitalFlowDiagram';
+import { RotationCalculator } from '../components/RotationCalculator';
 
 export function Section2Wall60() {
   const { checkpointChoices } = useStore();
@@ -54,6 +56,18 @@ export function Section2Wall60() {
       <MetricChart type="throughput" />
 
       <InventoryCalculator />
+
+      {/* Capital Rotation — the money has to go somewhere */}
+      <Paragraph>
+        But the money doesn't disappear. When hardware capex gets physically
+        bottlenecked, capital rotates. The $710B doesn't sit idle — it starts flowing
+        toward the supply-chain-agnostic side of the AI trade: software, inference
+        optimization, tooling. The rotation window is opening.
+      </Paragraph>
+
+      <CapitalFlowDiagram />
+
+      <RotationCalculator />
 
       <Paragraph>
         {isContained

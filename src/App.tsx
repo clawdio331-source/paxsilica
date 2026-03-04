@@ -3,6 +3,7 @@ import { useStore } from './store/useStore';
 import { MetricsPanel } from './components/MetricsPanel';
 import { TimelineSlider } from './components/TimelineSlider';
 import { Checkpoint } from './components/Checkpoint';
+import { RotationSentimentCard } from './components/RotationSentiment';
 import { Section0Baseline } from './sections/Section0Baseline';
 import { Section1First30 } from './sections/Section1First30';
 import { Section2Wall60 } from './sections/Section2Wall60';
@@ -189,6 +190,7 @@ function App() {
                   'Metrics crater. Buildout frozen. Emergency measures redirect all dual-use materials.',
               }}
             />
+            {checkpointChoices.day90 !== null && <RotationSentimentCard checkpointDay={90} />}
           </>
         )}
 
@@ -216,6 +218,7 @@ function App() {
                   'Defense allocation: 20-60% volatile. Impossible to plan around. Variance kills.',
               }}
             />
+            {checkpointChoices.day120 !== null && <RotationSentimentCard checkpointDay={120} />}
           </>
         )}
 

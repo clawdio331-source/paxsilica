@@ -1,6 +1,6 @@
 import { useStore } from '../store/useStore';
 import { Section, Paragraph, Callout } from '../components/Section';
-import { MetricChart } from '../components/MetricChart';
+import { LobbyRotationChart } from '../components/MetricChart';
 import { motion } from 'framer-motion';
 
 function LobbyGauge() {
@@ -93,7 +93,7 @@ export function Section5Lobby() {
         The numbers make the argument.
       </Paragraph>
 
-      <MetricChart type="lobby" />
+      <LobbyRotationChart />
 
       {isMild ? (
         <Callout type="info">
