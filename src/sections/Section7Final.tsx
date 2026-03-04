@@ -42,8 +42,8 @@ function DecisionNode({ checkpoint, choice }: { checkpoint: keyof CheckpointChoi
   );
 }
 
-function ComparisonBar({ label, yourValue, avgValue, unit, inverted = false }: {
-  label: string; yourValue: number; avgValue: number; unit: string; inverted?: boolean;
+function ComparisonBar({ label, yourValue, avgValue, unit }: {
+  label: string; yourValue: number; avgValue: number; unit: string;
 }) {
   const maxVal = Math.max(yourValue, avgValue) * 1.2 || 1;
   const yourPct = (yourValue / maxVal) * 100;
@@ -201,7 +201,7 @@ export function Section7Final() {
               vs Average Path
             </div>
             <ComparisonBar label="Delay" yourValue={metrics.delay} avgValue={avgMetrics.delay} unit=" mo" />
-            <ComparisonBar label="Supply Chain" yourValue={metrics.throughput} avgValue={avgMetrics.throughput} unit="%" inverted />
+            <ComparisonBar label="Supply Chain" yourValue={metrics.throughput} avgValue={avgMetrics.throughput} unit="%" />
             <ComparisonBar label="Stranded" yourValue={metrics.gap} avgValue={avgMetrics.gap} unit="B" />
             <ComparisonBar label="Lobby" yourValue={metrics.lobbyPressure} avgValue={avgMetrics.lobbyPressure} unit="" />
             <ComparisonBar label="Insurance" yourValue={metrics.maritimeInsurance} avgValue={avgMetrics.maritimeInsurance} unit="%" />

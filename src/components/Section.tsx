@@ -10,7 +10,7 @@ interface SectionProps {
   className?: string;
 }
 
-export function Section({ id, dayRange, label, title, children, className = '' }: SectionProps) {
+export function Section({ id, dayRange, label: _label, title, children, className = '' }: SectionProps) {
   return (
     <section
       id={id}
