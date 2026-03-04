@@ -2,7 +2,13 @@ import { useStore } from '../store/useStore';
 import { Section, Paragraph } from '../components/Section';
 import { motion } from 'framer-motion';
 import type { CheckpointChoices } from '../lib/metrics';
-import { computeAllMetrics } from '../lib/metrics';
+import {
+  computeAllMetrics,
+  rotationWindowPeak,
+  rotationWindowStart,
+  rotationWindowEnd,
+  softwareRotationIndex,
+} from '../lib/metrics';
 
 const CHOICE_LABELS: Record<keyof CheckpointChoices, { day: number; options: [string, string]; question: string }> = {
   day30: { day: 30, options: ['Contained Escalation', 'Spreading'], question: 'Nature of the Conflict' },
@@ -63,6 +69,104 @@ function ComparisonBar({ label, yourValue, avgValue, unit, inverted = false }: {
           animate={{ width: `${yourPct}%` }}
           transition={{ duration: 0.6 }}
         />
+      </div>
+    </div>
+  );
+}
+
+function RotationSummary({ escalationIndex }: { escalationIndex: number }) {
+  const peakDay = rotationWindowPeak(escalationIndex);
+  const peakRotation = softwareRotationIndex(peakDay, escalationIndex);
+  const windowStart = rotationWindowStart(escalationIndex);
+  const windowEndDay = rotationWindowEnd(escalationIndex);
+  const windowDuration = windowEndDay - windowStart;
+  const currentRotation = softwareRotationIndex(360, escalationIndex);
+  const rotationStatus = currentRotation > 5 ? 'active' : currentRotation > 0 ? 'expired' : 'never opened';
+
+  // Rough total capex through software during window
+  let totalSWCapex = 0;
+  for (let d = windowStart; d <= windowEndDay; d += 5) {
+    totalSWCapex += softwareRotationIndex(d, escalationIndex) * 0.01 * 710 * (5 / 360);
+  }
+
+  return (
+    <div className="mt-6 pt-5 border-t border-border-subtle">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-accent-blue mb-3">
+        Capital Rotation Summary
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div>
+          <div className="text-sm font-mono text-accent-blue">{peakRotation.toFixed(1)}%</div>
+          <div className="text-[9px] text-text-muted">Peak rotation (Day {peakDay})</div>
+        </div>
+        <div>
+          <div className="text-sm font-mono text-text-secondary">{windowDuration}d</div>
+          <div className="text-[9px] text-text-muted">Window duration</div>
+        </div>
+        <div>
+          <div className="text-sm font-mono text-accent-amber">${totalSWCapex.toFixed(0)}B</div>
+          <div className="text-[9px] text-text-muted">Total SW capex flow</div>
+        </div>
+        <div>
+          <div className={`text-sm font-mono ${rotationStatus === 'active' ? 'text-accent-green' : 'text-text-muted'}`}>
+            {rotationStatus}
+          </div>
+          <div className="text-[9px] text-text-muted">Status at Day 360</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegionalSummary({ metrics, escalationIndex }: { metrics: import('../lib/metrics').Metrics; escalationIndex: number }) {
+  const dist = metrics.regionalDist;
+  const centerOfGravity = dist.ksa > dist.uae
+    ? 'inland-dominant'
+    : dist.ksa > 30
+      ? 'shifting inland'
+      : 'coastal';
+
+  // Approximate capacity at Day 360
+  const uaeCapacity360 = Math.round(400 + 400 * (1 - escalationIndex * 0.2));
+  const ksaCapacity360 = Math.round(67 + 800 * (1 + escalationIndex * 0.5));
+  const bahrainCapacity360 = Math.round(20 + 40 * (1 + escalationIndex * 0.3));
+
+  return (
+    <div className="mt-5 pt-5 border-t border-border-subtle">
+      <div className="text-[10px] uppercase tracking-[0.2em] text-accent-teal mb-3">
+        Gulf Corridor Summary
+      </div>
+      <div className="space-y-2 mb-3">
+        {[
+          { label: 'UAE', start: '400MW', end: `${uaeCapacity360}MW`, status: 'defended · operational', color: 'text-accent-green' },
+          { label: 'KSA', start: '67MW', end: `${ksaCapacity360}MW`, status: `${((ksaCapacity360/67 - 1)*100).toFixed(0)}% growth vs baseline`, color: 'text-accent-teal' },
+          { label: 'Bahrain', start: '20MW', end: `${bahrainCapacity360}MW`, status: 'KSA annex · growing', color: 'text-accent-blue' },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center justify-between text-xs">
+            <span className="text-text-secondary w-16">{item.label}</span>
+            <span className="font-mono text-text-muted">{item.start} → <span className={item.color}>{item.end}</span></span>
+            <span className="text-[9px] text-text-muted hidden md:block">{item.status}</span>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-between bg-bg-primary/50 rounded-lg p-3">
+        <div>
+          <div className="text-sm font-mono text-accent-teal">{metrics.gulfCapacity}MW</div>
+          <div className="text-[9px] text-text-muted">Total Gulf capacity</div>
+        </div>
+        <div>
+          <div className={`text-sm font-mono ${
+            centerOfGravity === 'inland-dominant' ? 'text-accent-teal' :
+            centerOfGravity === 'shifting inland' ? 'text-accent-amber' : 'text-accent-green'
+          }`}>
+            {centerOfGravity}
+          </div>
+          <div className="text-[9px] text-text-muted">Center of gravity</div>
+        </div>
+        <div>
+          <div className="text-sm font-mono text-accent-green">PIE EXPANDED</div>
+          <div className="text-[9px] text-text-muted">vs pre-conflict</div>
+        </div>
       </div>
     </div>
   );
@@ -144,6 +248,12 @@ export function Section7Final() {
               </div>
             ))}
           </div>
+
+          {/* Capital Rotation Summary */}
+          <RotationSummary escalationIndex={escalationIndex} />
+
+          {/* Regional Summary */}
+          <RegionalSummary metrics={metrics} escalationIndex={escalationIndex} />
         </motion.div>
       ) : (
         <div className="bg-bg-elevated/40 border border-border-subtle rounded-xl p-8 my-8 text-center">
