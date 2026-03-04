@@ -119,6 +119,7 @@ export function WorldMap() {
           <motion.circle
             cx={505}
             cy={163}
+            r={straitClosed ? 8 : 5}
             fill="none"
             stroke={straitStatus}
             strokeWidth="0.8"

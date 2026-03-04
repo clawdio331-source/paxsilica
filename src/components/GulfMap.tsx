@@ -69,6 +69,7 @@ export function GulfMap() {
           <motion.circle
             cx={NODES[1].x}
             cy={NODES[1].y}
+            r={ksaGrowthRadius}
             fill="none"
             stroke="rgba(255,255,255,0.08)"
             strokeWidth="1"
@@ -109,6 +110,7 @@ export function GulfMap() {
               <motion.circle
                 cx={node.x}
                 cy={node.y}
+                r={radius}
                 fill={isKSA ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)'}
                 stroke="rgba(255,255,255,0.15)"
                 strokeWidth="0.5"
