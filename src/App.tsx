@@ -1,7 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useStore } from './store/useStore';
-import { MetricsPanel } from './components/MetricsPanel';
-import { TimelineSlider } from './components/TimelineSlider';
+import { DayIndicator } from './components/DayIndicator';
 import { Checkpoint } from './components/Checkpoint';
 import { RotationSentimentCard } from './components/RotationSentiment';
 import { Section0Baseline } from './sections/Section0Baseline';
@@ -35,7 +34,6 @@ function App() {
   const mainRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Set up Intersection Observer to track which section is visible
   const setupObserver = useCallback(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
@@ -52,7 +50,6 @@ function App() {
             const mapping = SECTION_DAY_MAP.find((m) => m.id === sectionId);
             if (!mapping) continue;
 
-            // Compute day based on how far we are into the section
             const rect = entry.target.getBoundingClientRect();
             const viewportCenter = window.innerHeight / 2;
             const sectionProgress = Math.max(
@@ -66,7 +63,6 @@ function App() {
 
             setConflictDay(day);
 
-            // Check if we've hit a checkpoint that needs a choice
             const checkpointKeys = ['day30', 'day60', 'day90', 'day120', 'day180'] as const;
             const checkpointDays = [30, 60, 90, 120, 180];
             const cpIndex = checkpointDays.indexOf(mapping.dayStart);
@@ -85,7 +81,6 @@ function App() {
       }
     );
 
-    // Observe all sections
     const sections = document.querySelectorAll('[id^="section-"], [id^="checkpoint-"]');
     sections.forEach((el) => observerRef.current?.observe(el));
 
@@ -93,12 +88,10 @@ function App() {
   }, [setConflictDay, setActiveCheckpoint]);
 
   useEffect(() => {
-    // Slight delay to ensure DOM is ready
     const timer = setTimeout(setupObserver, 100);
     return () => clearTimeout(timer);
   }, [setupObserver, checkpointChoices]);
 
-  // Prevent scroll when locked
   useEffect(() => {
     if (scrollLocked) {
       document.body.style.overflow = 'hidden';
@@ -111,11 +104,9 @@ function App() {
   }, [scrollLocked]);
 
   return (
-    <div ref={mainRef} className="relative">
-      {/* Main content area */}
-      <main className="lg:mr-64 pb-20">
+    <div ref={mainRef}>
+      <main className="pb-32">
         <Section0Baseline />
-
         <Section1First30 />
 
         <Checkpoint
@@ -142,7 +133,6 @@ function App() {
         {checkpointChoices.day30 !== null && (
           <>
             <Section2Wall60 />
-
             <Checkpoint
               day={60}
               storeKey="day60"
@@ -169,7 +159,6 @@ function App() {
         {checkpointChoices.day60 !== null && (
           <>
             <Section3DualUse />
-
             <Checkpoint
               day={90}
               storeKey="day90"
@@ -197,7 +186,6 @@ function App() {
         {checkpointChoices.day90 !== null && (
           <>
             <Section4Earnings />
-
             <Checkpoint
               day={120}
               storeKey="day120"
@@ -225,7 +213,6 @@ function App() {
         {checkpointChoices.day120 !== null && (
           <>
             <Section5Lobby />
-
             <Checkpoint
               day={180}
               storeKey="day180"
@@ -257,9 +244,8 @@ function App() {
         )}
       </main>
 
-      {/* Sticky UI */}
-      <MetricsPanel />
-      <TimelineSlider />
+      {/* Tiny floating day indicator — only visible after scrolling past hero */}
+      <DayIndicator />
     </div>
   );
 }
