@@ -36,28 +36,20 @@ export function Checkpoint({
     const chosen = currentChoice === 0 ? optionA : optionB;
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-2xl w-full text-center">
-          <div className="text-[10px] uppercase tracking-[0.3em] text-text-muted mb-2">
-            Checkpoint — Day {day}
-          </div>
-          <h2 className="font-heading text-2xl mb-4 text-text-primary">{title}</h2>
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${
-              currentChoice === 1
-                ? 'bg-accent-red/10 border border-accent-red/30 text-accent-red'
-                : 'bg-accent-green/10 border border-accent-green/30 text-accent-green'
-            }`}
-          >
-            <span className="text-xs opacity-60">You chose:</span>
-            {chosen.label}
+        <div className="max-w-xl w-full text-center">
+          <div className="text-[10px] font-mono text-text-muted mb-3">Day {day}</div>
+          <h2 className="font-heading text-xl mb-4 text-text-primary">{title}</h2>
+          <div className="text-sm text-text-secondary">
+            <span className="text-text-muted">You chose: </span>
+            <span className={currentChoice === 1 ? 'text-accent-red' : 'text-accent-green'}>
+              {chosen.label}
+            </span>
           </div>
           <button
-            onClick={() => {
-              setActiveCheckpoint(day);
-            }}
-            className="block mx-auto mt-4 text-xs text-text-muted hover:text-accent-teal transition-colors cursor-pointer"
+            onClick={() => setActiveCheckpoint(day)}
+            className="mt-4 text-[11px] text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
           >
-            Change decision
+            Change
           </button>
         </div>
       </div>
@@ -73,92 +65,58 @@ export function Checkpoint({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-bg-primary/60 backdrop-blur-sm z-10"
+            className="absolute inset-0 bg-bg-primary/70 backdrop-blur-sm z-10"
           />
         )}
       </AnimatePresence>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         viewport={{ once: false, amount: 0.5 }}
-        className="relative z-20 max-w-4xl w-full"
+        className="relative z-20 max-w-3xl w-full"
       >
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="h-px w-8 bg-accent-teal/40" />
-            <span className="text-[10px] uppercase tracking-[0.3em] text-accent-teal font-medium">
-              Checkpoint — Day {day}
-            </span>
-            <div className="h-px w-8 bg-accent-teal/40" />
-          </div>
-          <h2 className="font-heading text-3xl md:text-4xl mb-3 text-text-primary">{title}</h2>
-          <p className="text-text-secondary text-sm max-w-lg mx-auto leading-relaxed">{subtitle}</p>
+          <div className="text-[10px] font-mono text-text-muted mb-4">Day {day}</div>
+          <h2 className="font-heading text-2xl md:text-3xl mb-3 text-text-primary">{title}</h2>
+          <p className="text-text-secondary text-sm max-w-md mx-auto leading-relaxed">{subtitle}</p>
         </div>
 
         {/* Choice buttons */}
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-4">
           {[
             { option: optionA, value: 0 as const, side: 'de-escalation' },
             { option: optionB, value: 1 as const, side: 'escalation' },
           ].map(({ option, value, side }) => (
-            <motion.button
+            <button
               key={value}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                setCheckpointChoice(storeKey, value);
-              }}
-              className={`group relative text-left p-6 md:p-8 rounded-xl border cursor-pointer transition-all duration-300 ${
+              onClick={() => setCheckpointChoice(storeKey, value)}
+              className={`group text-left p-6 border transition-colors cursor-pointer ${
                 side === 'de-escalation'
-                  ? 'border-accent-green/20 hover:border-accent-green/50 hover:bg-accent-green/5'
-                  : 'border-accent-red/20 hover:border-accent-red/50 hover:bg-accent-red/5'
+                  ? 'border-white/[0.06] hover:border-accent-green/30'
+                  : 'border-white/[0.06] hover:border-accent-red/30'
               }`}
             >
-              {/* Tag */}
               <div
-                className={`text-[9px] uppercase tracking-[0.2em] font-semibold mb-3 ${
-                  side === 'de-escalation' ? 'text-accent-green' : 'text-accent-red'
+                className={`text-[9px] font-mono uppercase tracking-wider mb-3 ${
+                  side === 'de-escalation' ? 'text-accent-green/70' : 'text-accent-red/70'
                 }`}
               >
-                Option {value === 0 ? 'A' : 'B'}
+                {value === 0 ? 'A' : 'B'}
               </div>
 
-              <h3 className="font-heading text-xl md:text-2xl mb-3 text-text-primary">
-                {option.label}
-              </h3>
+              <h3 className="font-heading text-lg mb-2 text-text-primary">{option.label}</h3>
 
-              <p className="text-text-secondary text-sm leading-relaxed mb-4">
+              <p className="text-text-secondary text-[13px] leading-relaxed mb-4">
                 {option.description}
               </p>
 
-              {/* Impact note */}
-              <div className="text-[11px] text-text-muted border-t border-border-subtle pt-3 mt-auto">
-                <span className="font-semibold text-text-secondary">Impact: </span>
+              <div className="text-[11px] text-text-muted border-t border-border-subtle pt-3">
                 {option.impact}
               </div>
-
-              {/* Arrow indicator */}
-              <div
-                className={`absolute top-6 right-6 w-8 h-8 rounded-full border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
-                  side === 'de-escalation'
-                    ? 'border-accent-green/40 text-accent-green'
-                    : 'border-accent-red/40 text-accent-red'
-                }`}
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path
-                    d="M7 1L13 7L7 13M13 7H1"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </motion.button>
+            </button>
           ))}
         </div>
       </motion.div>

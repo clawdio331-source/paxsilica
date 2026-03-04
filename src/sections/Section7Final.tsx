@@ -24,18 +24,17 @@ function DecisionNode({ checkpoint, choice }: { checkpoint: keyof CheckpointChoi
   const isEscalation = choice === 1;
 
   return (
-    <div className="flex items-start gap-3">
-      <div className="flex flex-col items-center">
+    <div className="flex items-start gap-3 mb-3">
+      <div className="flex flex-col items-center pt-1">
         <div
-          className={`w-3 h-3 rounded-full border-2 ${
-            isEscalation ? 'border-accent-red bg-accent-red/30' : 'border-accent-green bg-accent-green/30'
+          className={`w-2 h-2 rounded-full ${
+            isEscalation ? 'bg-accent-red/50' : 'bg-accent-green/50'
           }`}
         />
-        <div className="w-px h-8 bg-border-subtle last:hidden" />
       </div>
-      <div className="pb-4">
-        <div className="text-[9px] text-text-muted uppercase tracking-wider">Day {info.day} — {info.question}</div>
-        <div className={`text-sm font-medium ${isEscalation ? 'text-accent-red' : 'text-accent-green'}`}>
+      <div>
+        <div className="text-[10px] text-text-muted font-mono">Day {info.day}</div>
+        <div className={`text-[13px] ${isEscalation ? 'text-accent-red/80' : 'text-accent-green/80'}`}>
           {info.options[choice]}
         </div>
       </div>
@@ -43,29 +42,28 @@ function DecisionNode({ checkpoint, choice }: { checkpoint: keyof CheckpointChoi
   );
 }
 
-function ComparisonBar({ label, yourValue, avgValue, unit, inverted = false }: {
-  label: string; yourValue: number; avgValue: number; unit: string; inverted?: boolean;
+function ComparisonBar({ label, yourValue, avgValue, unit }: {
+  label: string; yourValue: number; avgValue: number; unit: string;
 }) {
   const maxVal = Math.max(yourValue, avgValue) * 1.2 || 1;
   const yourPct = (yourValue / maxVal) * 100;
   const avgPct = (avgValue / maxVal) * 100;
-  const yourBetter = inverted ? yourValue > avgValue : yourValue < avgValue;
 
   return (
     <div className="mb-3">
       <div className="flex justify-between text-[10px] text-text-muted mb-1">
         <span>{label}</span>
         <span className="font-mono">
-          {yourValue}{unit} <span className="text-text-muted/50">vs</span> {avgValue}{unit} avg
+          {yourValue}{unit} <span className="opacity-50">vs</span> {avgValue}{unit}
         </span>
       </div>
-      <div className="relative h-3 bg-bg-primary rounded-full overflow-hidden">
+      <div className="relative h-1 bg-white/[0.03]">
         <div
-          className="absolute top-0 h-full bg-text-muted/20 rounded-full"
+          className="absolute top-0 h-full bg-white/[0.06]"
           style={{ width: `${avgPct}%` }}
         />
         <motion.div
-          className={`absolute top-0 h-full rounded-full ${yourBetter ? 'bg-accent-green/60' : 'bg-accent-red/60'}`}
+          className="absolute top-0 h-full bg-white/20"
           animate={{ width: `${yourPct}%` }}
           transition={{ duration: 0.6 }}
         />
@@ -83,7 +81,6 @@ function RotationSummary({ escalationIndex }: { escalationIndex: number }) {
   const currentRotation = softwareRotationIndex(360, escalationIndex);
   const rotationStatus = currentRotation > 5 ? 'active' : currentRotation > 0 ? 'expired' : 'never opened';
 
-  // Rough total capex through software during window
   let totalSWCapex = 0;
   for (let d = windowStart; d <= windowEndDay; d += 5) {
     totalSWCapex += softwareRotationIndex(d, escalationIndex) * 0.01 * 710 * (5 / 360);
@@ -91,27 +88,25 @@ function RotationSummary({ escalationIndex }: { escalationIndex: number }) {
 
   return (
     <div className="mt-6 pt-5 border-t border-border-subtle">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-accent-blue mb-3">
+      <div className="text-[10px] font-mono text-text-muted mb-3">
         Capital Rotation Summary
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div>
-          <div className="text-sm font-mono text-accent-blue">{peakRotation.toFixed(1)}%</div>
-          <div className="text-[9px] text-text-muted">Peak rotation (Day {peakDay})</div>
+          <div className="text-sm font-mono text-text-primary">{peakRotation.toFixed(1)}%</div>
+          <div className="text-[9px] text-text-muted">Peak (Day {peakDay})</div>
         </div>
         <div>
           <div className="text-sm font-mono text-text-secondary">{windowDuration}d</div>
-          <div className="text-[9px] text-text-muted">Window duration</div>
+          <div className="text-[9px] text-text-muted">Window</div>
         </div>
         <div>
-          <div className="text-sm font-mono text-accent-amber">${totalSWCapex.toFixed(0)}B</div>
-          <div className="text-[9px] text-text-muted">Total SW capex flow</div>
+          <div className="text-sm font-mono text-text-secondary">${totalSWCapex.toFixed(0)}B</div>
+          <div className="text-[9px] text-text-muted">SW capex flow</div>
         </div>
         <div>
-          <div className={`text-sm font-mono ${rotationStatus === 'active' ? 'text-accent-green' : 'text-text-muted'}`}>
-            {rotationStatus}
-          </div>
-          <div className="text-[9px] text-text-muted">Status at Day 360</div>
+          <div className="text-sm font-mono text-text-secondary">{rotationStatus}</div>
+          <div className="text-[9px] text-text-muted">Day 360 status</div>
         </div>
       </div>
     </div>
@@ -126,46 +121,35 @@ function RegionalSummary({ metrics, escalationIndex }: { metrics: import('../lib
       ? 'shifting inland'
       : 'coastal';
 
-  // Approximate capacity at Day 360
   const uaeCapacity360 = Math.round(400 + 400 * (1 - escalationIndex * 0.2));
   const ksaCapacity360 = Math.round(67 + 800 * (1 + escalationIndex * 0.5));
   const bahrainCapacity360 = Math.round(20 + 40 * (1 + escalationIndex * 0.3));
 
   return (
     <div className="mt-5 pt-5 border-t border-border-subtle">
-      <div className="text-[10px] uppercase tracking-[0.2em] text-accent-teal mb-3">
+      <div className="text-[10px] font-mono text-text-muted mb-3">
         Gulf Corridor Summary
       </div>
-      <div className="space-y-2 mb-3">
+      <div className="space-y-1.5 mb-3">
         {[
-          { label: 'UAE', start: '400MW', end: `${uaeCapacity360}MW`, status: 'defended · operational', color: 'text-accent-green' },
-          { label: 'KSA', start: '67MW', end: `${ksaCapacity360}MW`, status: `${((ksaCapacity360/67 - 1)*100).toFixed(0)}% growth vs baseline`, color: 'text-accent-teal' },
-          { label: 'Bahrain', start: '20MW', end: `${bahrainCapacity360}MW`, status: 'KSA annex · growing', color: 'text-accent-blue' },
+          { label: 'UAE', start: '400MW', end: `${uaeCapacity360}MW` },
+          { label: 'KSA', start: '67MW', end: `${ksaCapacity360}MW` },
+          { label: 'Bahrain', start: '20MW', end: `${bahrainCapacity360}MW` },
         ].map((item) => (
-          <div key={item.label} className="flex items-center justify-between text-xs">
-            <span className="text-text-secondary w-16">{item.label}</span>
-            <span className="font-mono text-text-muted">{item.start} → <span className={item.color}>{item.end}</span></span>
-            <span className="text-[9px] text-text-muted hidden md:block">{item.status}</span>
+          <div key={item.label} className="flex items-center justify-between text-[12px]">
+            <span className="text-text-muted w-16">{item.label}</span>
+            <span className="font-mono text-text-secondary">{item.start} → {item.end}</span>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between bg-bg-primary/50 rounded-lg p-3">
+      <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
         <div>
-          <div className="text-sm font-mono text-accent-teal">{metrics.gulfCapacity}MW</div>
-          <div className="text-[9px] text-text-muted">Total Gulf capacity</div>
+          <div className="text-sm font-mono text-text-primary">{metrics.gulfCapacity}MW</div>
+          <div className="text-[9px] text-text-muted">Total capacity</div>
         </div>
         <div>
-          <div className={`text-sm font-mono ${
-            centerOfGravity === 'inland-dominant' ? 'text-accent-teal' :
-            centerOfGravity === 'shifting inland' ? 'text-accent-amber' : 'text-accent-green'
-          }`}>
-            {centerOfGravity}
-          </div>
+          <div className="text-sm font-mono text-text-secondary">{centerOfGravity}</div>
           <div className="text-[9px] text-text-muted">Center of gravity</div>
-        </div>
-        <div>
-          <div className="text-sm font-mono text-accent-green">PIE EXPANDED</div>
-          <div className="text-[9px] text-text-muted">vs pre-conflict</div>
         </div>
       </div>
     </div>
@@ -175,16 +159,13 @@ function RegionalSummary({ metrics, escalationIndex }: { metrics: import('../lib
 export function Section7Final() {
   const { checkpointChoices, metrics, escalationIndex, resetAll } = useStore();
 
-  // Compute average scenario (ei = 0.5)
   const avgMetrics = computeAllMetrics(360, 0.5);
-
   const allChosen = Object.values(checkpointChoices).every((v) => v !== null);
 
   return (
     <Section
       id="section-7"
       dayRange="Day 271–360"
-      label="Section 7"
       title="The Final Accounting"
     >
       <Paragraph>
@@ -196,12 +177,12 @@ export function Section7Final() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-bg-elevated/60 border border-border-subtle rounded-xl p-6 md:p-8 my-8"
+          className="my-8"
         >
           {/* Decision tree */}
           <div className="mb-6">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-text-muted mb-4">
-              Your Scenario Path
+            <div className="text-[10px] font-mono text-text-muted mb-4">
+              Your Scenario
             </div>
             {(Object.keys(CHOICE_LABELS) as (keyof CheckpointChoices)[]).map((key) => (
               <DecisionNode key={key} checkpoint={key} choice={checkpointChoices[key]} />
@@ -210,53 +191,42 @@ export function Section7Final() {
 
           {/* Escalation score */}
           <div className="flex items-center justify-between py-4 border-y border-border-subtle mb-6">
-            <span className="text-sm text-text-secondary">Composite Escalation Index</span>
-            <div className="flex items-center gap-3">
-              <div className="w-24 h-2 bg-bg-primary rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-accent-green via-accent-amber to-accent-red"
-                  animate={{ width: `${escalationIndex * 100}%` }}
-                />
-              </div>
-              <span className="font-mono text-lg text-accent-teal">{escalationIndex.toFixed(2)}</span>
-            </div>
+            <span className="text-sm text-text-secondary">Escalation Index</span>
+            <span className="font-mono text-lg text-text-primary">{escalationIndex.toFixed(2)}</span>
           </div>
 
           {/* Comparison */}
           <div className="mb-6">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-text-muted mb-4">
-              Your Scenario vs Average Path
+            <div className="text-[10px] font-mono text-text-muted mb-4">
+              vs Average Path
             </div>
-            <ComparisonBar label="Buildout Delay" yourValue={metrics.delay} avgValue={avgMetrics.delay} unit=" mo" />
-            <ComparisonBar label="Supply Chain" yourValue={metrics.throughput} avgValue={avgMetrics.throughput} unit="%" inverted />
-            <ComparisonBar label="Stranded Capex" yourValue={metrics.gap} avgValue={avgMetrics.gap} unit="B" />
-            <ComparisonBar label="Lobby Pressure" yourValue={metrics.lobbyPressure} avgValue={avgMetrics.lobbyPressure} unit="" />
-            <ComparisonBar label="Maritime Insurance" yourValue={metrics.maritimeInsurance} avgValue={avgMetrics.maritimeInsurance} unit="%" />
+            <ComparisonBar label="Delay" yourValue={metrics.delay} avgValue={avgMetrics.delay} unit=" mo" />
+            <ComparisonBar label="Supply Chain" yourValue={metrics.throughput} avgValue={avgMetrics.throughput} unit="%" />
+            <ComparisonBar label="Stranded" yourValue={metrics.gap} avgValue={avgMetrics.gap} unit="B" />
+            <ComparisonBar label="Lobby" yourValue={metrics.lobbyPressure} avgValue={avgMetrics.lobbyPressure} unit="" />
+            <ComparisonBar label="Insurance" yourValue={metrics.maritimeInsurance} avgValue={avgMetrics.maritimeInsurance} unit="%" />
           </div>
 
-          {/* Final metrics grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* Final metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 border-y border-border-subtle">
             {[
-              { label: 'Total Delay', value: `${metrics.delay} mo`, color: metrics.delay > 9 ? 'text-accent-red' : 'text-accent-amber' },
-              { label: 'Stranded', value: `$${metrics.gap}B`, color: metrics.gap > 100 ? 'text-accent-red' : 'text-accent-amber' },
-              { label: 'Throughput', value: `${metrics.throughput}%`, color: metrics.throughput < 50 ? 'text-accent-red' : 'text-accent-green' },
-              { label: 'Lobby Score', value: `${metrics.lobbyPressure}`, color: metrics.lobbyPressure > 65 ? 'text-accent-red' : 'text-accent-amber' },
+              { label: 'Total Delay', value: `${metrics.delay} mo` },
+              { label: 'Stranded', value: `$${metrics.gap}B` },
+              { label: 'Throughput', value: `${metrics.throughput}%` },
+              { label: 'Lobby', value: `${metrics.lobbyPressure}` },
             ].map((item) => (
-              <div key={item.label} className="bg-bg-primary/50 rounded-lg p-3 text-center">
-                <div className={`text-xl font-heading ${item.color}`}>{item.value}</div>
-                <div className="text-[9px] uppercase tracking-wider text-text-muted mt-1">{item.label}</div>
+              <div key={item.label} className="text-center">
+                <div className="text-xl font-heading text-text-primary">{item.value}</div>
+                <div className="text-[9px] text-text-muted mt-1">{item.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Capital Rotation Summary */}
           <RotationSummary escalationIndex={escalationIndex} />
-
-          {/* Regional Summary */}
           <RegionalSummary metrics={metrics} escalationIndex={escalationIndex} />
         </motion.div>
       ) : (
-        <div className="bg-bg-elevated/40 border border-border-subtle rounded-xl p-8 my-8 text-center">
+        <div className="py-8 my-8 text-center border-y border-border-subtle">
           <p className="text-text-muted text-sm">
             Complete all 5 checkpoints to see your full scenario summary.
           </p>
@@ -279,16 +249,12 @@ export function Section7Final() {
       >
         <button
           onClick={resetAll}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-accent-teal/30 text-accent-teal hover:bg-accent-teal/10 transition-colors text-sm font-medium cursor-pointer"
+          className="text-sm text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8C14 11.3137 11.3137 14 8 14C5.79086 14 3.87539 12.7252 2.92893 10.8787" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M2 4V8H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
           Explore a Different Path
         </button>
-        <p className="text-[11px] text-text-muted mt-3">
-          Scroll back to the top and make different choices at each checkpoint.
+        <p className="text-[11px] text-text-muted/60 mt-2">
+          Scroll back to the top and make different choices.
         </p>
       </motion.div>
     </Section>

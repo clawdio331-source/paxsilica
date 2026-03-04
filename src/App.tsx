@@ -113,7 +113,7 @@ function App() {
   return (
     <div ref={mainRef} className="relative">
       {/* Main content area */}
-      <main className="lg:mr-72 pb-20">
+      <main className="lg:mr-64 pb-20">
         <Section0Baseline />
 
         <Section1First30 />
